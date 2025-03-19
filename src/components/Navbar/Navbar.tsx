@@ -2,7 +2,7 @@ import { Bell, CalendarDays, LogOut, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function Navbar() {
-    const userRole = "jefe";
+    const userRole = "checador";
 
     // Opciones de navegación basadas en el rol
     const navOptions = {
@@ -56,23 +56,25 @@ export default function Navbar() {
                 <h1 className="text-white text-2xl ml-2">Mike's Schedules</h1>
             </div>
 
-            <div className="flex space-x-4 text-white">
+            <div className="flex space-x-6 text-white font-semibold items-center justify-center">
                 <Link
-                    className="hover:font-bold duration-100 ease-in p-2"
+                    className="group relative inline-block text-white h-6"
                     to="/home"
                 >
                     Inicio
+                    <span className="absolute left-0 bottom-0 h-[2px] bg-white w-0 transition-all duration-300 group-hover:w-full"></span>
                 </Link>
 
                 {/* Opciones según el rol */}
                 {navOptions[userRole]?.map((option) => (
                     <Link
                         key={option.path}
-                        className="hover:font-bold duration-100 ease-in p-2"
+                        className="group relative inline-block text-white h-6"
                         to={option.path}
                         title={option.title}
                     >
                         {option.label}
+                        <span className="absolute left-0 bottom-0 h-[2px] bg-white w-0 transition-all duration-300 group-hover:w-full"></span>
                     </Link>
                 ))}
 
