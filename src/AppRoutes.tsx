@@ -1,7 +1,9 @@
 import { Route, Routes } from "react-router-dom";
-import Login from "./Components/Login-Register/Login";
-import Register from "./Components/Login-Register/Register";
+import Login from "./Components/auth/Login";
+import Register from "./Components/auth/Register";
 import Inicio from "./Inicio";
+import Schedule from "./Components/schedule/Schedule";
+import Prueba from "./Components/schedule/prueba";
 
 export default function AppRoutes(){
     return (
@@ -10,6 +12,7 @@ export default function AppRoutes(){
                 <Route path="/" element={<Login />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/prueba" element={<Prueba />}/>
             </Routes>
         </>
     )
