@@ -2,47 +2,47 @@ import { Bell, CalendarDays, LogOut, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function Navbar() {
-    const userRole = "checador";
+    const userRole = "maestro";
 
     // Opciones de navegación basadas en el rol
     const navOptions = {
         jefe: [
             {
-                path: "/historial",
+                path: "/history",
                 label: "Historial de Clases",
-                title: "Ver las clases pasadas y asistencia del grupo.",
+                title: "Ver las clases pasadas y asistencia del profesor.",
             },
             {
-                path: "/reportes",
-                label: "Estado de Reportes",
+                path: "/reports",
+                label: "Lista de Reportes",
                 title: "Lista de reportes hechos y su estado.",
             },
+            // {
+            //     path: "/edit",
+            //     label: "Corregir Reportes",
+            //     title: "Editar o corregir reportes incorrectos.",
+            // },
         ],
         maestro: [
             {
-                path: "/justificar",
-                label: "Justificar Faltas",
-                title: "Subir evidencia en caso de ausencia.",
-            },
-            {
-                path: "/mi-historial",
+                path: "/history",
                 label: "Mi Historial",
                 title: "Ver todas sus asistencias y reportes.",
             },
         ],
         checador: [
             {
-                path: "/verificar",
+                path: "/check",
                 label: "Verificar Asistencia",
                 title: "Consultar reportes de faltas y confirmarlos.",
             },
             {
-                path: "/corregir",
+                path: "/edit",
                 label: "Corregir Reportes",
                 title: "Editar o corregir reportes incorrectos.",
             },
             {
-                path: "/reportes-generales",
+                path: "/general-reports",
                 label: "Reportes Generales",
                 title: "Acceso a estadísticas de asistencia.",
             },
@@ -50,11 +50,14 @@ export default function Navbar() {
     };
 
     return (
-        <nav className="h-16 w-full bg-blue-500 flex flex-row justify-between items-center px-20">
-            <div className="flex flex-row items-center justify-center">
+        <nav className="h-16 w-full bg-blue-800 flex flex-row justify-between items-center px-20">
+            <Link
+                to="/home"
+                className="flex flex-row items-center justify-center"
+            >
                 <CalendarDays className="text-white h-10 w-10" />
                 <h1 className="text-white text-2xl ml-2">Mike's Schedules</h1>
-            </div>
+            </Link>
 
             <div className="flex space-x-6 text-white font-semibold items-center justify-center">
                 <Link
@@ -82,7 +85,7 @@ export default function Navbar() {
                 <div className="flex flex-row border-l border-gray-300/20">
                     <Link
                         className="hover:font-bold duration-100 ease-in p-2"
-                        to="/notificaciones"
+                        to="/notifications"
                         title="Notificaciones"
                     >
                         <Bell className="w-5 h-5 fill-current text-white hover:text-green-400 transition duration-200" />

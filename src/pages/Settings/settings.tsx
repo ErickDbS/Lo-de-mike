@@ -1,7 +1,7 @@
 export default function Settings() {
     return (
         <>
-            <h1>Settings</h1>
+            <h1 className="text-white">Configuraciones generales</h1>
         </>
     );
 }
