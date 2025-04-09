@@ -7,6 +7,9 @@ import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
 import Reports from "./pages/reports/reports";
 import History from "./pages/history/History";
+import HomeAdmin from "./pages/Home/homeAdmin";
+
+const userRole: string = "admin";
 
 export default function AppRoutes() {
     return (
@@ -17,7 +20,12 @@ export default function AppRoutes() {
                 <Route path="/register" element={<Register />} />
 
                 <Route path="/" element={<Layout />}>
-                    <Route path="/home" index element={<Home />} />
+                    <Route
+                        path="/home"
+                        element={
+                            userRole === "admin" ? <HomeAdmin /> : <Home />
+                        }
+                    />
                     <Route path="/history" element={<History />} />
                     <Route path="/reports" element={<Reports />} />
                     <Route path="/settings" element={<Settings />} />

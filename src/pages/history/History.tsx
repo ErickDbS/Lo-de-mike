@@ -6,7 +6,7 @@ export default function History() {
             return (
                 <>
                     <h1 className="text-white">
-                        Aqui se mostrara el historial de clases pasadas y
+                        Aqui se mostrará una lista de clases pasadas y
                         asistencia de los profesores.
                     </h1>
                 </>
@@ -15,7 +15,10 @@ export default function History() {
         case "maestro":
             return (
                 <>
-                    <h1 className="text-white">POnganse al tiro</h1>
+                    <h1 className="text-white">
+                        Aquí el profesor podrá ver una lista de sus clases
+                        pasadas y justificar sus faltas o retardos.
+                    </h1>
                 </>
             );
             break;

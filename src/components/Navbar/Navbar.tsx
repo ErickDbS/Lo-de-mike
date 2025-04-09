@@ -2,7 +2,7 @@ import { Bell, CalendarDays, LogOut, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function Navbar() {
-    const userRole = "maestro";
+    const userRole = "jefeCarrera";
 
     // Opciones de navegación basadas en el rol
     const navOptions = {
@@ -10,18 +10,8 @@ export default function Navbar() {
             {
                 path: "/history",
                 label: "Historial de Clases",
-                title: "Ver las clases pasadas y asistencia del profesor.",
+                title: "Ver las clases pasadas y asistencia del profesores.",
             },
-            {
-                path: "/reports",
-                label: "Lista de Reportes",
-                title: "Lista de reportes hechos y su estado.",
-            },
-            // {
-            //     path: "/edit",
-            //     label: "Corregir Reportes",
-            //     title: "Editar o corregir reportes incorrectos.",
-            // },
         ],
         maestro: [
             {
@@ -30,21 +20,11 @@ export default function Navbar() {
                 title: "Ver todas sus asistencias y reportes.",
             },
         ],
-        checador: [
+        jefeCarrera: [
             {
-                path: "/check",
-                label: "Verificar Asistencia",
-                title: "Consultar reportes de faltas y confirmarlos.",
-            },
-            {
-                path: "/edit",
-                label: "Corregir Reportes",
-                title: "Editar o corregir reportes incorrectos.",
-            },
-            {
-                path: "/general-reports",
-                label: "Reportes Generales",
-                title: "Acceso a estadísticas de asistencia.",
+                path: "/schedules",
+                label: "Horarios",
+                title: "Ver horarios con la opción de crear, eliminar, editar.",
             },
         ],
     };
