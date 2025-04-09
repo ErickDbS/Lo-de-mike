@@ -1,11 +1,12 @@
 import { Route, Routes } from "react-router-dom";
-import Login from "./pages/Auth/Login";
-import Register from "./pages/Auth/Register";
 import Layout from "./pages/layout/layout";
 import Home from "./pages/Home/home";
 import Settings from "./pages/Settings/settings";
-import History from "./pages/history/History";
+import Prueba from "./components/schedule/Prueba";
+import Login from "./pages/Auth/Login";
+import Register from "./pages/Auth/Register";
 import Reports from "./pages/reports/reports";
+import History from "./pages/history/History";
 
 export default function AppRoutes() {
     return (
@@ -21,6 +22,7 @@ export default function AppRoutes() {
                     <Route path="/reports" element={<Reports />} />
                     <Route path="/settings" element={<Settings />} />
                 </Route>
+                <Route path="/prueba" element={<Prueba />} />
             </Routes>
         </>
     );
