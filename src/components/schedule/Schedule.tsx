@@ -7,14 +7,24 @@ interface Horario {
     tema: string;
 }
 
+interface Tarea {
+    userid: string;
+    user: string,
+    password: string,
+    active: string
+}
+
 interface ScheduleProps {
     grupo: string;
     aula: string;
     horarios: Horario[];
+    tareas: Tarea[]; // Cambia el tipo según la estructura de tus tareas
 }
 
-export default function Schedule({ grupo, aula, horarios }: ScheduleProps) {
+export default function Schedule({ grupo, aula, horarios, tareas }: ScheduleProps) {
     const [checked, setChecked] = useState<{ [key: string]: boolean }>({});
+
+    console.log("Tareas:", tareas);
 
     const toggleCheck = (key: string) => {
         setChecked((prev) => ({
