@@ -1,9 +1,44 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, CalendarDays } from "lucide-react";
 import { useState } from "react";
+import { supabase } from "../../services/supabaseClient";
+import Swal from "sweetalert2";
 
 export default function Login() {
     const [showPassword, setShowPassword] = useState(false);
+    const [password, setPassword] = useState("");
+    const [email, setEmail] = useState("");
+    const navigate = useNavigate();
+
+    const submit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault(); //Hace que no se recargue la pagina al clickear el boton
+        //Consultamos a la bdd si exite dicho usuario
+        const { data, error } = await supabase
+            .from("users")
+            .select("*")
+            .eq("username", email)
+            .eq("password", password)
+            .single();
+
+        if (!data || error) {
+            console.error(error);
+            Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: "Credenciales incorrectas!",
+            });
+        } else {
+            //Guardo en el localhost los datos del usuario
+            const UserData = {
+                enrollment_number: data.enrollment_number,
+                username: data.username,
+                role: data.role_id,
+            };
+            localStorage.setItem("UserData", JSON.stringify(UserData));
+            navigate("/home");
+        }
+    };
+
     return (
         <>
             <nav className="h-16 w-full bg-blue-800 flex flex-row justify-left items-center px-20">
@@ -11,17 +46,22 @@ export default function Login() {
                 <h1 className="text-white text-2xl ml-2">Mike's Schedules</h1>
             </nav>
             <div className="min-h-[calc(100vh-4rem)] flex flex-col justify-center items-center relative">
-                <form className="grid gap-4 border-4 w-96 p-6 bg-[#1e2022] shadow-md rounded-md border-[1px] border-gray-400">
+                <form
+                    onSubmit={submit}
+                    className="grid gap-4 border-4 w-96 p-6 bg-[#1e2022] shadow-md rounded-md border-[1px] border-gray-400"
+                >
                     <label className="grid text-4xl place-items-center text-blue-400">
-                        Iniciar Sesion
+                        Iniciar Sesión
                     </label>
                     <label className="text-xl font-bold text-white">
-                        Correo
+                        Usuario
                     </label>
                     <input
-                        type="email"
+                        type="text"
+                        value={email}
                         className="w-80 p-2 border rounded-md placeholder:text-gray-400 placeholder:italic text-white"
-                        placeholder="Nombre@hotmail.com"
+                        placeholder="username"
+                        onChange={(e) => setEmail(e.target.value)}
                         required
                     />
                     <label className="text-xl font-bold text-white">
@@ -33,6 +73,8 @@ export default function Login() {
                             className="w-full p-2 border rounded-md placeholder:text-gray-200 pr-10 text-white"
                             required
                             placeholder="******"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                         />
                         <button
                             type="button"

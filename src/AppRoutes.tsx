@@ -9,7 +9,7 @@ import Reports from "./pages/reports/reports";
 import History from "./pages/history/History";
 import HomeAdmin from "./pages/Home/homeAdmin";
 
-const userRole: string = "admin";
+const userRole: string = "dmin";
 
 export default function AppRoutes() {
     return (
