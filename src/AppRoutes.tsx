@@ -8,9 +8,9 @@ import Register from "./pages/Auth/Register";
 import Reports from "./pages/reports/reports";
 import History from "./pages/history/History";
 import HomeAdmin from "./pages/Home/homeAdmin";
+import Schedule from "./pages/Schedules/Schedule";
 
-
-const userRole: string = "jefe";
+const userRole: string = "jefeCarrera";
 
 export default function AppRoutes() {
     return (
@@ -30,6 +30,7 @@ export default function AppRoutes() {
                     <Route path="/history" element={<History />} />
                     <Route path="/reports" element={<Reports />} />
                     <Route path="/settings" element={<Settings />} />
+                    <Route path="/schedules" element={<Schedule />} />
                 </Route>
                 <Route path="/prueba" element={<Prueba />} />
 

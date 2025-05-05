@@ -10,7 +10,7 @@ export default function Card({nameProfesor, nameMateria, Hora}: CardProps){
         <>
 
         <div className="grid place-items-center">
-            <div className="text-white text-4xl border border-solid rounded-xl w-100 grid place-items-center ">
+            <div className="text-white text-4xl border border-solid rounded-xl w-100 grid place-items-center bg-gray-900">
                 <div className="text-xl pt-5">
                     <p><strong className="pt-1 text-blue-800">Materia:</strong> {nameProfesor}</p>
                     <p><strong className="pt-1 text-blue-800">Profesor: </strong> {nameMateria}</p>
