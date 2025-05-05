@@ -27,10 +27,10 @@ export default function Schedule({ grupo, aula, horarios }: ScheduleProps) {
 
 
     return (
-        <div className="bg-gray-900 min-h-screen flex justify-center items-center p-6">
-            <div className="w-full max-w-5xl bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
+        <div className="flex justify-center items-center rounded-2xl">
+            <div className="w-full max-w-5xl  rounded-2xl shadow-lg overflow-hidden">
                 {/* Encabezado */}
-                <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 text-center text-xl font-bold">
+                <div className="bg-blue-800 text-white p-4 text-center text-xl font-bold">
                     Grupo {grupo} - {aula}
                 </div>
 
