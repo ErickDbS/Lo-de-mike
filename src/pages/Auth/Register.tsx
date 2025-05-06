@@ -1,8 +1,14 @@
-import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { HTMLFormMethod, Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { Eye, EyeOff, CalendarDays } from "lucide-react";
 import { supabase } from "../../services/supabaseClient";
 import Swal from "sweetalert2";
+import { useFetch } from "../../hooks/useFetch";
+
+interface RegisterResponse {
+    message: string;
+    user: { id: number; username: string };
+}
 
 export default function Register() {
     const [name, setName] = useState("");
@@ -15,6 +21,53 @@ export default function Register() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const navigate = useNavigate();
+
+    // **Estados para disparar el hook**
+    const [endpoint, setEndpoint] = useState<string | null>(null);
+    const [options, setOptions] = useState<RequestInit | null>(null);
+
+    // Aquí invocamos el hook UNA VEZ arriba
+    const {
+        data,
+        loading,
+        error: fetchError,
+    } = useFetch<RegisterResponse>(endpoint, options);
+
+    // Cuando `data` cambie (es decir, registro OK), lo procesamos
+    useEffect(() => {
+        if (data) {
+            Swal.fire({
+                icon: "success",
+                title: "¡Registro exitoso!",
+                text: `Bienvenido ${data.user.username}`,
+            }).then(() => {
+                localStorage.setItem(
+                    "UserData",
+                    JSON.stringify({ username, role: rol })
+                );
+                navigate("/home");
+            });
+        }
+    }, [data]);
+
+    const submit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (error) return;
+
+        // Disparamos el hook
+        setEndpoint("https://schedulechecker.up.railway.app/api/users");
+        setOptions({
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                name,
+                lastname,
+                username,
+                password,
+                role_id: rol,
+            }),
+        });
+    };
 
     const handlePassword = (value: string) => {
         setPassword(value);
@@ -31,39 +84,6 @@ export default function Register() {
             setError("Las contraseñas no coinciden");
         } else {
             setError("");
-        }
-    };
-
-    const submit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-
-        const { data, error } = await supabase
-            .from("users")
-            .insert([
-                {
-                    name: name,
-                    lastname: lastname,
-                    username: username,
-                    password: password,
-                    role_id: rol,
-                },
-            ])
-            .select();
-        if (!data || error) {
-            console.error(error);
-            Swal.fire({
-                icon: "error",
-                title: "Oops...",
-                text: "A ocurrido un error, intente más tarde.",
-            });
-        } else {
-            //Guardo en el localhost los datos del usuario
-            const UserData = {
-                username: username,
-                role: rol,
-            };
-            localStorage.setItem("UserData", JSON.stringify(UserData));
-            navigate("/home");
         }
     };
 
@@ -87,7 +107,7 @@ export default function Register() {
                         <input
                             type="text"
                             className="w-38 p-2 mr-2 border rounded-md placeholder:text-gray-400 placeholder:italic text-white"
-                            placeholder="Primer Nombre"
+                            placeholder="Nombre"
                             required
                             value={name}
                             onChange={(e) => setName(e.target.value)}
@@ -197,7 +217,7 @@ export default function Register() {
                                 ? "bg-gray-400 text-gray-700 cursor-not-allowed"
                                 : "bg-blue-800 text-white hover:bg-blue-700 cursor-pointer"
                         }`}
-                        disabled={!!error}
+                        disabled={!!error || loading}
                     >
                         Crear Cuenta
                     </button>
