@@ -30,11 +30,10 @@ export default function Register() {
     } = useForm();
 
     // Hook para la peticion http
-    const {
-        data,
-        loading,
-        error: fetchError,
-    } = useFetch<RegisterResponse>(endpoint, options);
+    const { data, error: fetchError } = useFetch<RegisterResponse>(
+        endpoint,
+        options
+    );
 
     useEffect(() => {
         if (data) {
@@ -55,7 +54,6 @@ export default function Register() {
 
             navigate("/home");
         }
-        console.log(fetchError);
     }, [data, navigate]);
 
     useEffect(() => {
@@ -82,15 +80,12 @@ export default function Register() {
     };
 
     const onSubmit = (data: object) => {
-        // console.log(data);
         setEndpoint("https://schedulechecker.up.railway.app/api/users");
         setOptions({
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
         });
-        // navigate("/home");
-        console.log(fetchError);
     };
 
     return (

@@ -1,42 +1,51 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, CalendarDays } from "lucide-react";
-import { useState } from "react";
-import { supabase } from "../../services/supabaseClient";
+import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
+import { useForm } from "react-hook-form";
+import { useFetch } from "../../hooks/useFetch";
 
 export default function Login() {
     const [showPassword, setShowPassword] = useState(false);
-    const [password, setPassword] = useState("");
-    const [email, setEmail] = useState("");
     const navigate = useNavigate();
+    const { data, error: fetchError, doFetch, loading } = useFetch(null, null);
 
-    const submit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault(); //Hace que no se recargue la pagina al clickear el boton
-        //Consultamos a la bdd si exite dicho usuario
-        const { data, error } = await supabase
-            .from("users")
-            .select("*")
-            .eq("username", email)
-            .eq("password", password)
-            .single();
-
-        if (!data || error) {
-            console.error(error);
-            Swal.fire({
-                icon: "error",
-                title: "Oops...",
-                text: "Credenciales incorrectas!",
-            });
-        } else {
-            //Guardo en el localhost los datos del usuario
-            const UserData = {
-                enrollment_number: data.enrollment_number,
-                username: data.username,
-                role: data.role_id,
-            };
-            localStorage.setItem("UserData", JSON.stringify(UserData));
+    useEffect(() => {
+        if (data) {
+            localStorage.setItem(
+                "UserData",
+                JSON.stringify({
+                    username: getValues("username"),
+                    role: getValues("role_id"),
+                })
+            );
             navigate("/home");
         }
+    }, [data, navigate]);
+
+    useEffect(() => {
+        if (fetchError) {
+            Swal.fire({
+                icon: "error",
+                title: "Error al Iniciar Sesión",
+                text: fetchError.message,
+            });
+        }
+    }, [fetchError]);
+
+    const {
+        register,
+        handleSubmit,
+        getValues,
+        formState: { errors },
+    } = useForm();
+
+    const onSubmit = (data: object) => {
+        doFetch("https://schedulechecker.up.railway.app/api/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+        });
     };
 
     return (
@@ -47,7 +56,7 @@ export default function Login() {
             </nav>
             <div className="min-h-[calc(100vh-4rem)] flex flex-col justify-center items-center relative">
                 <form
-                    onSubmit={submit}
+                    onSubmit={handleSubmit(onSubmit)}
                     className="grid gap-4 border-4 w-96 p-6 bg-[#1e2022] shadow-md rounded-md border-[1px] border-gray-400"
                 >
                     <label className="grid text-4xl place-items-center text-blue-400">
@@ -58,12 +67,14 @@ export default function Login() {
                     </label>
                     <input
                         type="text"
-                        value={email}
                         className="w-80 p-2 border rounded-md placeholder:text-gray-400 placeholder:italic text-white"
-                        placeholder="username"
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
+                        {...register("username", {
+                            required: true,
+                        })}
                     />
+                    {errors.username?.type === "required" && (
+                        <span className="text-red-500">Campo requerido.</span>
+                    )}
                     <label className="text-xl font-bold text-white">
                         Contraseña
                     </label>
@@ -71,10 +82,10 @@ export default function Login() {
                         <input
                             type={showPassword ? "text" : "password"}
                             className="w-full p-2 border rounded-md placeholder:text-gray-200 pr-10 text-white"
-                            required
                             placeholder="******"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            {...register("password", {
+                                required: true,
+                            })}
                         />
                         <button
                             type="button"
@@ -88,8 +99,19 @@ export default function Login() {
                             )}
                         </button>
                     </div>
-                    <button className="text-white rounded-md bg-blue-800 mt-5 py-2 hover:bg-blue-700 cursor-pointer">
-                        Iniciar Sesión
+                    {errors.password?.type === "required" && (
+                        <span className="text-red-500">Campo requerido.</span>
+                    )}
+                    <button
+                        className={`text-white rounded-md bg-blue-800 mt-5 py-2
+                        ${
+                            loading
+                                ? "bg-gray-400 text-gray-700 cursor-not-allowed"
+                                : "bg-blue-800 text-white hover:bg-blue-700 cursor-pointer"
+                        }`}
+                        disabled={loading}
+                    >
+                        {loading ? "Cargando..." : "Iniciar Sesión"}
                     </button>
                     <label className="grid place-items-center text-white">
                         O

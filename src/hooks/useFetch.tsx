@@ -68,5 +68,21 @@ export function useFetch<T = any>(
         }
     };
 
-    return { data, loading, error, handleCancelRequest };
+    const doFetch = async (url: string, options: RequestInit) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const res = await fetch(url, options);
+            const text = await res.text();
+            const body = JSON.parse(text) || text;
+            if (!res.ok) throw body;
+            setData(body);
+        } catch (err) {
+            setError(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return { data, loading, error, handleCancelRequest, doFetch };
 }
