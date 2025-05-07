@@ -16,9 +16,6 @@ export default function Register() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const navigate = useNavigate();
-    // **Estados para disparar el hook**
-    const [endpoint, setEndpoint] = useState<string | null>(null);
-    const [options, setOptions] = useState<RequestInit | null>(null);
 
     // Hook para uso de formulario
     const {
@@ -30,10 +27,12 @@ export default function Register() {
     } = useForm();
 
     // Hook para la peticion http
-    const { data, error: fetchError } = useFetch<RegisterResponse>(
-        endpoint,
-        options
-    );
+    const {
+        data,
+        error: fetchError,
+        doFetch,
+        loading,
+    } = useFetch<RegisterResponse>(null, null);
 
     useEffect(() => {
         if (data) {
@@ -80,8 +79,7 @@ export default function Register() {
     };
 
     const onSubmit = (data: object) => {
-        setEndpoint("https://schedulechecker.up.railway.app/api/users");
-        setOptions({
+        doFetch("https://schedulechecker.up.railway.app/api/users", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
@@ -243,13 +241,14 @@ export default function Register() {
                             error ||
                             !watch("password") ||
                             !confirmPassword ||
+                            loading ||
                             !isValid
                                 ? "bg-gray-400 text-gray-700 cursor-not-allowed"
                                 : "bg-blue-800 text-white hover:bg-blue-700 cursor-pointer"
                         }`}
                         disabled={!!error}
                     >
-                        Crear Cuenta
+                        {loading ? "Cargando..." : "Crear Cuenta"}
                     </button>
                     <label className="grid place-items-center text-white">
                         O
