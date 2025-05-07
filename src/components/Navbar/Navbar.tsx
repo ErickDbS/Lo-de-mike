@@ -1,8 +1,10 @@
 import { Bell, CalendarDays, LogOut, Settings } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 export default function Navbar() {
     const userRole = "jefeCarrera";
+    const navigate = useNavigate();
 
     // Opciones de navegación basadas en el rol
     const navOptions = {
@@ -27,6 +29,23 @@ export default function Navbar() {
                 title: "Ver horarios con la opción de crear, eliminar, editar.",
             },
         ],
+    };
+
+    const logOut = () => {
+        Swal.fire({
+            title: "¿Está seguro que desea salir?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si",
+            cancelButtonText: "Cancelar",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                localStorage.removeItem("UserData");
+                navigate("/");
+            }
+        });
     };
 
     return (
@@ -79,13 +98,13 @@ export default function Navbar() {
                         <Settings className="w-6 h-6 stroke-2 stroke-current transition duration-500 hover:text-yellow-500" />
                     </Link>
 
-                    <Link
-                        className="hover:font-bold duration-100 ease-in p-2"
-                        to="/logout"
+                    <a
+                        className="hover:font-bold duration-100 ease-in p-2 cursor-pointer"
                         title="Cerrar Sesión"
+                        onClick={logOut}
                     >
                         <LogOut className="w-6 h-6 stroke-current text-white transition duration-500 hover:text-red-500" />
-                    </Link>
+                    </a>
                 </div>
             </div>
         </nav>

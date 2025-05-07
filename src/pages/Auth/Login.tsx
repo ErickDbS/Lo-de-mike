@@ -15,8 +15,8 @@ export default function Login() {
             localStorage.setItem(
                 "UserData",
                 JSON.stringify({
-                    username: getValues("username"),
-                    role: getValues("role_id"),
+                    username: data.user.username,
+                    role: data.user.role_id,
                 })
             );
             navigate("/home");
@@ -36,7 +36,6 @@ export default function Login() {
     const {
         register,
         handleSubmit,
-        getValues,
         formState: { errors },
     } = useForm();
 
