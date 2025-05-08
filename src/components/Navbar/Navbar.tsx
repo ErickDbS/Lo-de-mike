@@ -5,7 +5,7 @@ import { AuthContext } from "../../utils/authContext";
 import { useContext } from "react";
 
 // 1. Definir tipo para los roles
-type UserRole = 1 | 2 | 3;
+type UserRole = 1 | 2 | 3 | 4;
 
 export default function Navbar() {
     const navigate = useNavigate();
@@ -39,6 +39,20 @@ export default function Navbar() {
                 title: "Ver horarios con la opción de crear, eliminar, editar.",
             },
         ],
+        4: [
+            {
+                path: "",
+                label: "Opciones de jef@ de carrera",
+                title: "",
+            },
+        ],
+    };
+
+    const userTypes = {
+        1: "Jef@ de grupo",
+        2: "Maestr@",
+        3: "Checador@",
+        4: "Jef@ de carrera",
     };
 
     const logOut = () => {
@@ -61,13 +75,28 @@ export default function Navbar() {
 
     return (
         <nav className="h-16 w-full bg-blue-800 flex flex-row justify-between items-center px-20">
-            <Link
-                to="/home"
-                className="flex flex-row items-center justify-center"
-            >
-                <CalendarDays className="text-white h-10 w-10" />
-                <h1 className="text-white text-2xl ml-2">Mike's Schedules</h1>
-            </Link>
+            <div className="flex flex-row items-center">
+                <Link
+                    to="/home"
+                    className="flex flex-row items-center justify-center"
+                >
+                    <CalendarDays className="text-white h-10 w-10" />
+                    <h1 className="text-white text-2xl ml-2">
+                        Mike's Schedules
+                    </h1>
+                </Link>
+                {/* data user */}
+                <div className="border-x border-gray-300/20 px-3 ml-4">
+                    <p className="text-lg text-white mb-0.5 font-medium">
+                        {`${authContext.storage.name} ${authContext.storage.lastname}`}
+                    </p>
+                    <p className="text-base text-[#a3b5c5] -mt-2 italic">
+                        {authContext.storage.username}
+                    </p>
+                </div>
+
+                <p className="text-lg text-white p-2">{userTypes[userRole]}</p>
+            </div>
 
             <div className="flex space-x-6 text-white font-semibold items-center justify-center">
                 <Link
@@ -93,13 +122,6 @@ export default function Navbar() {
 
                 {/* Opciones generales */}
                 <div className="flex flex-row border-l border-gray-300/20">
-                    {/* data user */}
-                    <div className="border-r border-gray-300/20 px-2">
-                        <p className="text-base">{`${authContext.storage.name} ${authContext.storage.lastname}`}</p>
-                        <p className="text-sm color-[#a3b5c5]">
-                            {authContext.storage.username}{" "}
-                        </p>
-                    </div>
                     <Link
                         className="hover:font-bold duration-100 ease-in p-2"
                         to="/notifications"
