@@ -10,30 +10,21 @@ import ProtectedRoute from "./utils/protectedRoute";
 import Layout from "./pages/layout/layout";
 import { useContext } from "react";
 import { AuthContext } from "./utils/authContext";
+
 export default function AppRoutes() {
     const authContext = useContext(AuthContext) as any;
     const userRole: any = authContext?.storage?.role;
+
     const isAuthenticated = () => {
-        if (authContext.storage !== undefined || authContext.storage !== null) {
-            return true;
-        }
-        return false;
+        return authContext?.storage != null;
     };
+
     return (
         <>
             <Routes>
-                <Route
-                    element={
-                        <ProtectedRoute
-                            canActivate={isAuthenticated()}
-                            redirectPath="/home"
-                        />
-                    }
-                >
-                    <Route path="/" element={<Login />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<Register />} />
-                </Route>
+                <Route path="/" element={<Login />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
 
                 <Route
                     element={<ProtectedRoute canActivate={isAuthenticated()} />}
