@@ -12,7 +12,7 @@ import { useContext } from "react";
 import { AuthContext } from "./utils/authContext";
 export default function AppRoutes() {
     const authContext = useContext(AuthContext) as any;
-    const userRole: any = authContext.storage.role;
+    const userRole: any = authContext?.storage?.role;
     const isAuthenticated = () => {
         if (authContext.storage !== undefined || authContext.storage !== null) {
             return true;
