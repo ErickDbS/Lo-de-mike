@@ -1,8 +1,12 @@
+import { useContext } from "react";
+import { AuthContext } from "../../utils/authContext";
+
 export default function History() {
-    const userRole: string = "maestro";
+    const authContext = useContext(AuthContext) as any;
+    const userRole: any = authContext.storage.role;
 
     switch (userRole) {
-        case "jefe":
+        case 1:
             return (
                 <>
                     <h1 className="text-white">
@@ -12,7 +16,7 @@ export default function History() {
                 </>
             );
             break;
-        case "maestro":
+        case 2:
             return (
                 <>
                     <h1 className="text-white">

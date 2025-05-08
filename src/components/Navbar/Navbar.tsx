@@ -4,28 +4,35 @@ import Swal from "sweetalert2";
 import { AuthContext } from "../../utils/authContext";
 import { useContext } from "react";
 
+// 1. Definir tipo para los roles
+type UserRole = 1 | 2 | 3;
+
 export default function Navbar() {
-    const userRole = "jefeCarrera";
     const navigate = useNavigate();
     const authContext = useContext(AuthContext) as any;
+    // 3. Asegurar el tipo con aserción
+    const userRole = authContext.storage.role as UserRole;
 
-    // Opciones de navegación basadas en el rol
-    const navOptions = {
-        jefe: [
+    // 2. Tipar navOptions con Record<UserRole>
+    const navOptions: Record<
+        UserRole,
+        Array<{ path: string; label: string; title: string }>
+    > = {
+        1: [
             {
                 path: "/history",
                 label: "Historial de Clases",
                 title: "Ver las clases pasadas y asistencia del profesores.",
             },
         ],
-        maestro: [
+        2: [
             {
                 path: "/history",
                 label: "Mi Historial",
                 title: "Ver todas sus asistencias y reportes.",
             },
         ],
-        jefeCarrera: [
+        3: [
             {
                 path: "/schedules",
                 label: "Horarios",
@@ -71,8 +78,8 @@ export default function Navbar() {
                     <span className="absolute left-0 bottom-0 h-[2px] bg-white w-0 transition-all duration-300 group-hover:w-full"></span>
                 </Link>
 
-                {/* Opciones según el rol */}
-                {navOptions[userRole]?.map((option) => (
+                {/* Mapeo seguro gracias a la tipificación */}
+                {navOptions[userRole].map((option) => (
                     <Link
                         key={option.path}
                         className="group relative inline-block text-white h-6"
@@ -86,6 +93,13 @@ export default function Navbar() {
 
                 {/* Opciones generales */}
                 <div className="flex flex-row border-l border-gray-300/20">
+                    {/* data user */}
+                    <div className="border-r border-gray-300/20 px-2">
+                        <p className="text-base">{`${authContext.storage.name} ${authContext.storage.lastname}`}</p>
+                        <p className="text-sm color-[#a3b5c5]">
+                            {authContext.storage.username}{" "}
+                        </p>
+                    </div>
                     <Link
                         className="hover:font-bold duration-100 ease-in p-2"
                         to="/notifications"
@@ -101,7 +115,6 @@ export default function Navbar() {
                     >
                         <Settings className="w-6 h-6 stroke-2 stroke-current transition duration-500 hover:text-yellow-500" />
                     </Link>
-
                     <a
                         className="hover:font-bold duration-100 ease-in p-2 cursor-pointer"
                         title="Cerrar Sesión"

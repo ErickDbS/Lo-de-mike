@@ -10,13 +10,10 @@ import ProtectedRoute from "./utils/protectedRoute";
 import Layout from "./pages/layout/layout";
 import { useContext } from "react";
 import { AuthContext } from "./utils/authContext";
-
-const userRole: string = "admin";
-
 export default function AppRoutes() {
     const authContext = useContext(AuthContext) as any;
+    const userRole: any = authContext.storage.role;
     const isAuthenticated = () => {
-        console.log("storage", authContext.storage);
         if (authContext.storage !== undefined || authContext.storage !== null) {
             return true;
         }
@@ -44,9 +41,7 @@ export default function AppRoutes() {
                     <Route path="/" element={<Layout />}>
                         <Route
                             path="/home"
-                            element={
-                                userRole === "admin" ? <HomeAdmin /> : <Home />
-                            }
+                            element={userRole === 4 ? <HomeAdmin /> : <Home />}
                         />
                         <Route path="/history" element={<History />} />
                         <Route path="/reports" element={<Reports />} />
