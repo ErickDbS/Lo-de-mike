@@ -1,10 +1,13 @@
 import { Bell, CalendarDays, LogOut, Settings } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import { AuthContext } from "../../utils/authContext";
+import { useContext } from "react";
 
 export default function Navbar() {
     const userRole = "jefeCarrera";
     const navigate = useNavigate();
+    const authContext = useContext(AuthContext) as any;
 
     // Opciones de navegación basadas en el rol
     const navOptions = {
@@ -42,6 +45,7 @@ export default function Navbar() {
             cancelButtonText: "Cancelar",
         }).then((result) => {
             if (result.isConfirmed) {
+                authContext.setStorage(undefined);
                 localStorage.removeItem("UserData");
                 navigate("/");
             }

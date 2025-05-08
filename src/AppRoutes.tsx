@@ -8,25 +8,27 @@ import History from "./pages/history/History";
 import HomeAdmin from "./pages/Home/homeAdmin";
 import ProtectedRoute from "./utils/protectedRoute";
 import Layout from "./pages/layout/layout";
+import { useContext } from "react";
+import { AuthContext } from "./utils/authContext";
 
 const userRole: string = "admin";
-console.log(localStorage.getItem("UserData"));
-
-const isAuthenticated = () => {
-    if (localStorage.getItem("UserData") !== null) {
-        return true;
-    }
-    return false;
-};
 
 export default function AppRoutes() {
+    const authContext = useContext(AuthContext) as any;
+    const isAuthenticated = () => {
+        console.log("storage", authContext.storage);
+        if (authContext.storage !== undefined || authContext.storage !== null) {
+            return true;
+        }
+        return false;
+    };
     return (
         <>
             <Routes>
                 <Route
                     element={
                         <ProtectedRoute
-                            canActivate={!isAuthenticated()}
+                            canActivate={isAuthenticated()}
                             redirectPath="/home"
                         />
                     }

@@ -1,24 +1,25 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, CalendarDays } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import Swal from "sweetalert2";
 import { useForm } from "react-hook-form";
 import { useFetch } from "../../hooks/useFetch";
+import { AuthContext } from "../../utils/authContext";
 
 export default function Login() {
+    const authContext = useContext(AuthContext) as any;
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
     const { data, error: fetchError, doFetch, loading } = useFetch(null, null);
 
     useEffect(() => {
         if (data) {
-            localStorage.setItem(
-                "UserData",
-                JSON.stringify({
-                    username: data.user.username,
-                    role: data.user.role_id,
-                })
-            );
+            authContext.setStorage({
+                username: data.user.username,
+                name: data.user.name,
+                lastname: data.user.lastname,
+                role: data.user.role_id,
+            });
             navigate("/home");
         }
     }, [data, navigate]);

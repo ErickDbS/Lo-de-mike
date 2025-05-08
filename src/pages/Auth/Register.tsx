@@ -1,9 +1,10 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Eye, EyeOff, CalendarDays } from "lucide-react";
 import Swal from "sweetalert2";
 import { useFetch } from "../../hooks/useFetch";
 import { useForm } from "react-hook-form";
+import { AuthContext } from "../../utils/authContext";
 
 interface RegisterResponse {
     message: string;
@@ -11,6 +12,7 @@ interface RegisterResponse {
 }
 
 export default function Register() {
+    const authContext = useContext(AuthContext) as any;
     const [confirmPassword, setConfirmPassword] = useState("");
     const [error, setError] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -42,13 +44,12 @@ export default function Register() {
                 title: "¡Registro exitoso!",
                 text: data.message,
             }).then(() => {
-                localStorage.setItem(
-                    "UserData",
-                    JSON.stringify({
-                        username: getValues("username"),
-                        role: getValues("role_id"),
-                    })
-                );
+                authContext.setStorage({
+                    username: getValues("username"),
+                    name: getValues("name"),
+                    lastname: getValues("lastname"),
+                    role: getValues("role_id"),
+                });
             });
 
             navigate("/home");
