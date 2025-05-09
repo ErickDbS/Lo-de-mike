@@ -11,6 +11,7 @@ import Layout from "./pages/layout/layout";
 import { useContext } from "react";
 import { AuthContext } from "./utils/authContext";
 import Schedule from "./pages/Schedules/Schedule";
+import NewSchedule from "./pages/Schedules/NewSchedule";
 
 export default function AppRoutes() {
     const authContext = useContext(AuthContext) as any;
@@ -39,6 +40,10 @@ export default function AppRoutes() {
                         <Route path="/history" element={<History />} />
                         <Route path="/reports" element={<Reports />} />
                         <Route path="/settings" element={<Settings />} />
+                        <Route
+                            path="/newSchedule"
+                            element={<NewSchedule></NewSchedule>}
+                        ></Route>
                     </Route>
                 </Route>
             </Routes>

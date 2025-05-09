@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { AuthContext } from "../../utils/authContext";
 import { useContext } from "react";
+import CreateScheduleModal from "../modals/CreateScheduleModal";
 
 // 1. Definir tipo para los roles
 type UserRole = 1 | 2 | 3 | 4;
@@ -42,7 +43,7 @@ export default function Navbar() {
         4: [
             {
                 path: "",
-                label: "Opciones de jef@ de carrera",
+                label: "",
                 title: "",
             },
         ],
@@ -107,6 +108,8 @@ export default function Navbar() {
                     <span className="absolute left-0 bottom-0 h-[2px] bg-white w-0 transition-all duration-300 group-hover:w-full"></span>
                 </Link>
 
+                {userRole === 4 ? <CreateScheduleModal /> : ""}
+
                 {/* Mapeo seguro gracias a la tipificación */}
                 {navOptions[userRole].map((option) => (
                     <Link
@@ -148,4 +151,7 @@ export default function Navbar() {
             </div>
         </nav>
     );
+}
+function useScheduleModal() {
+    throw new Error("Function not implemented.");
 }
