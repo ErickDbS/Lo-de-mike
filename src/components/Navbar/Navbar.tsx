@@ -152,6 +152,3 @@ export default function Navbar() {
         </nav>
     );
 }
-function useScheduleModal() {
-    throw new Error("Function not implemented.");
-}

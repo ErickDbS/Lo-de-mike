@@ -1,8 +1,7 @@
-import React from "react";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { Link } from "react-router-dom";
-import { CalendarPlus } from "lucide-react";
+import { Pencil } from "lucide-react";
 
 interface ScheduleEntry {
     time: string;
@@ -20,8 +19,8 @@ interface NewScheduleData {
 
 const MySwal = withReactContent(Swal);
 
-export default function CreateScheduleModal() {
-    const showScheduleModal = async () => {
+export default function EditScheduleModal() {
+    const showEditScheduleModal = async () => {
         const initialEntries: ScheduleEntry[] = [
             {
                 time: "17:00 - 18:00",
@@ -65,7 +64,7 @@ export default function CreateScheduleModal() {
         const entryRefs: HTMLTableRowElement[] = [];
 
         const result = await MySwal.fire<NewScheduleData>({
-            title: "Crear Nuevo Horario",
+            title: "Editar Horario",
             html: (
                 <div style={{ maxHeight: "60vh", overflowY: "auto" }}>
                     <input
@@ -214,20 +213,32 @@ export default function CreateScheduleModal() {
     };
 
     return (
+        // <Link
+        //     className="group relative inline-block text-white h-6 flex flex-row"
+        //     to="#"
+        // onClick={(e) => {
+        //     e.preventDefault();
+        //     showScheduleModal();
+        // }}
+        //     title="Crear nuevo horario."
+        // >
+        //     <div className="flex fle-row gap-x-[3px]">
+        //         <CalendarPlus />
+        //         Crear horario
+        //     </div>
+        //     <span className="absolute left-0 bottom-0 h-[2px] bg-white w-0 transition-all duration-300 group-hover:w-full"></span>
+        // </Link>
+
         <Link
-            className="group relative inline-block text-white h-6 flex flex-row"
-            to="#"
+            to={""}
             onClick={(e) => {
                 e.preventDefault();
-                showScheduleModal();
+                showEditScheduleModal();
             }}
-            title="Crear nuevo horario."
+            className="absolute end-6 top-4 hidden group-has-hover:block hover:scale-115 hover:cursor-pointer transition duration-300 ease-in-out text-yellow-500 animate-fade-left animate-ease-linear animate-duration-300 "
+            title="Editar Horario"
         >
-            <div className="flex fle-row gap-x-[3px]">
-                <CalendarPlus />
-                Crear horario
-            </div>
-            <span className="absolute left-0 bottom-0 h-[2px] bg-white w-0 transition-all duration-300 group-hover:w-full"></span>
+            <Pencil />
         </Link>
     );
 }

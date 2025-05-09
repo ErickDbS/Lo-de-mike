@@ -1,6 +1,5 @@
 import SearchBar from "../../components/SearchComponent/SearchBar";
-import CreateScheduleModal from "../../components/modals/CreateScheduleModal";
-import Schedule from "../../components/schedule/Schedule";
+import ScheduleAdmin from "../../components/schedule/ScheduleAdmin";
 
 export default function HomeAdmin() {
     const horarios = [
@@ -47,14 +46,44 @@ export default function HomeAdmin() {
                 </h1>
                 <SearchBar />
             </div>
-            <div className="w-full h-dvh bg-[#1e2022] rounded-lg">
-                <div className="w-200 h-100">
-                    <Schedule
-                        grupo="4-03-IS"
-                        aula="Aula 20"
-                        horarios={horarios}
-                    ></Schedule>
-                </div>
+            <div className="w-full h-dvh bg-[#1e2022] rounded-lg p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <ScheduleAdmin
+                    grupo="4-03-IS"
+                    aula="Aula 20"
+                    horarios={horarios}
+                ></ScheduleAdmin>
+
+                <ScheduleAdmin
+                    grupo="4-03-IS"
+                    aula="Aula 20"
+                    horarios={horarios}
+                ></ScheduleAdmin>
+
+                <ScheduleAdmin
+                    grupo="4-03-IS"
+                    aula="Aula 20"
+                    horarios={horarios}
+                ></ScheduleAdmin>
+                <ScheduleAdmin
+                    grupo="4-03-IS"
+                    aula="Aula 20"
+                    horarios={horarios}
+                ></ScheduleAdmin>
+                <ScheduleAdmin
+                    grupo="4-03-IS"
+                    aula="Aula 20"
+                    horarios={horarios}
+                ></ScheduleAdmin>
+                <ScheduleAdmin
+                    grupo="4-03-IS"
+                    aula="Aula 20"
+                    horarios={horarios}
+                ></ScheduleAdmin>
+                <ScheduleAdmin
+                    grupo="4-03-IS"
+                    aula="Aula 20"
+                    horarios={horarios}
+                ></ScheduleAdmin>
             </div>
         </>
     );
