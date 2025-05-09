@@ -10,6 +10,7 @@ import ProtectedRoute from "./utils/protectedRoute";
 import Layout from "./pages/layout/layout";
 import { useContext } from "react";
 import { AuthContext } from "./utils/authContext";
+import Schedule from "./pages/Schedules/Schedule";
 
 export default function AppRoutes() {
     const authContext = useContext(AuthContext) as any;
@@ -34,6 +35,7 @@ export default function AppRoutes() {
                             path="/home"
                             element={userRole === 4 ? <HomeAdmin /> : <Home />}
                         />
+                        <Route path="/schedules" element={<Schedule />} />
                         <Route path="/history" element={<History />} />
                         <Route path="/reports" element={<Reports />} />
                         <Route path="/settings" element={<Settings />} />
