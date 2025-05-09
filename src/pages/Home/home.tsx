@@ -1,4 +1,4 @@
-import Card from "../../components/Card/Card";
+import Card from "../../components/Cards/CardSchedule/Card";
 import Schedule from "../../components/schedule/Schedule";
 
 export default function Home() {
