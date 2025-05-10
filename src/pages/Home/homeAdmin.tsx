@@ -46,7 +46,7 @@ export default function HomeAdmin() {
                 </h1>
                 <SearchBar />
             </div>
-            <div className="w-full h-dvh bg-[#1e2022] rounded-lg p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="w-full h-[calc(100svh_-_12.2rem)] bg-[#1e2022] rounded-lg px-4 pt-4 pb-0 grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto">
                 <ScheduleAdmin
                     grupo="4-03-IS"
                     aula="Aula 20"
