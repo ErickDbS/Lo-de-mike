@@ -2,3 +2,8 @@
 /* tailwind css v4.x */
 @import "tailwindcss";
 @import "tailwindcss-animated";
+
+.rs-anim-fade,
+.rs-anim-in {
+    z-index: 9999 !important;
+}

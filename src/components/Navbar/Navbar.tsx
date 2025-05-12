@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { AuthContext } from "../../utils/authContext";
 import { useContext } from "react";
-import CreateScheduleModal from "../modals/CreateScheduleModal";
+import CreateScheduleModal from "../modals/CreateSchedule/CreateScheduleModal";
 
 // 1. Definir tipo para los roles
 type UserRole = 1 | 2 | 3 | 4;

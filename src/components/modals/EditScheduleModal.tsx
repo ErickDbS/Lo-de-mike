@@ -57,6 +57,20 @@ export default function EditScheduleModal() {
                 days: { L: false, M: false, X: false, J: false, V: false },
                 topic: "",
             },
+            {
+                time: "21:00 - 22:00",
+                subject: "",
+                professor: "",
+                days: { L: false, M: false, X: false, J: false, V: false },
+                topic: "",
+            },
+            {
+                time: "21:00 - 22:00",
+                subject: "",
+                professor: "",
+                days: { L: false, M: false, X: false, J: false, V: false },
+                topic: "",
+            },
         ];
 
         let groupNameInput: HTMLInputElement;
@@ -65,6 +79,7 @@ export default function EditScheduleModal() {
 
         const result = await MySwal.fire<NewScheduleData>({
             title: "Editar Horario",
+            theme: "dark",
             html: (
                 <div style={{ maxHeight: "60vh", overflowY: "auto" }}>
                     <input
@@ -80,7 +95,9 @@ export default function EditScheduleModal() {
                     <table className="table-auto w-full text-sm">
                         <thead>
                             <tr>
-                                <th>Hora</th>
+                                <th>Hora inicio</th>
+                                <th>─</th>
+                                <th>Hora fin</th>
                                 <th>Materia</th>
                                 <th>Profesor</th>
                                 <th>L</th>
@@ -99,13 +116,41 @@ export default function EditScheduleModal() {
                                         if (el) entryRefs.push(el);
                                     }}
                                 >
-                                    <td>{entry.time}</td>
+                                    <td>
+                                        <input
+                                            type="text"
+                                            data-idx={idx}
+                                            data-field="start-time"
+                                            className="swal2-input max-w-[100px] px-2 text-sm"
+                                            style={{
+                                                marginLeft: "1px",
+                                                marginRight: "1px",
+                                            }}
+                                        />
+                                    </td>
+                                    <td>─</td>
+                                    <td>
+                                        <input
+                                            type="text"
+                                            data-idx={idx}
+                                            data-field="end-time"
+                                            className="swal2-input max-w-[100px] px-2 text-sm"
+                                            style={{
+                                                marginLeft: "1px",
+                                                marginRight: "1px",
+                                            }}
+                                        />
+                                    </td>
                                     <td>
                                         <input
                                             type="text"
                                             data-idx={idx}
                                             data-field="subject"
                                             className="swal2-input"
+                                            style={{
+                                                marginLeft: "1px",
+                                                marginRight: "1px",
+                                            }}
                                         />
                                     </td>
                                     <td>
@@ -114,6 +159,10 @@ export default function EditScheduleModal() {
                                             data-idx={idx}
                                             data-field="professor"
                                             className="swal2-input"
+                                            style={{
+                                                marginLeft: "1px",
+                                                marginRight: "1px",
+                                            }}
                                         />
                                     </td>
                                     {(["L", "M", "X", "J", "V"] as const).map(
@@ -136,6 +185,10 @@ export default function EditScheduleModal() {
                                             data-idx={idx}
                                             data-field="topic"
                                             className="swal2-input"
+                                            style={{
+                                                marginLeft: "1px",
+                                                marginRight: "1px",
+                                            }}
                                         />
                                     </td>
                                 </tr>
@@ -144,8 +197,9 @@ export default function EditScheduleModal() {
                     </table>
                 </div>
             ),
-            width: "80%",
+            width: "70%",
             confirmButtonText: "Guardar",
+            confirmButtonColor: "#193cb8",
             showCancelButton: true,
             preConfirm: () => {
                 groupNameInput = Swal.getPopup()?.querySelector(
