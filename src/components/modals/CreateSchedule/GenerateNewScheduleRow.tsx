@@ -32,42 +32,46 @@ export default function GenerateNewScheduleRow() {
                 onSubmit={handleSubmit(onSubmit)}
                 className="flex flex-row justify-between w-full"
             >
-                <TimePicker
-                    className=""
-                    format="hh:mm aa"
-                    showMeridiem
-                    value={time}
-                    container={document.body}
-                    onChange={(value) => setTime(value)}
-                />
-                <TimePicker
-                    className=""
-                    format="hh:mm aa"
-                    showMeridiem
-                    value={time}
-                    container={document.body}
-                    onChange={(value) => setTime(value)}
-                />
-                <SelectPicker
-                    data={MATERIAS}
-                    placeholder="Profesor"
-                    className="w-[224]"
-                />
-                <SelectPicker
-                    data={MATERIAS}
-                    placeholder="Materia"
-                    className="w-[224]"
-                />
-                <SelectPicker
-                    data={MATERIAS}
-                    placeholder="Tema"
-                    className="w-[224]"
-                />
-                <SelectPicker
-                    data={MATERIAS}
-                    placeholder="Unidad"
-                    className="w-[224]"
-                />
+                <div className="grid grid-cols-2 gap-2 w-3/10">
+                    <TimePicker
+                        className=""
+                        format="hh:mm aa"
+                        showMeridiem
+                        value={time}
+                        container={document.body}
+                        onChange={(value) => setTime(value)}
+                    />
+                    <TimePicker
+                        className=""
+                        format="hh:mm aa"
+                        showMeridiem
+                        value={time}
+                        container={document.body}
+                        onChange={(value) => setTime(value)}
+                    />
+                </div>
+                <div className="grid grid-cols-4 gap-2 w-full ml-2">
+                    <SelectPicker
+                        data={MATERIAS}
+                        placeholder=""
+                        className="w-[224]"
+                    />
+                    <SelectPicker
+                        data={MATERIAS}
+                        placeholder=""
+                        className="w-[224]"
+                    />
+                    <SelectPicker
+                        data={MATERIAS}
+                        placeholder=""
+                        className="w-[224]"
+                    />
+                    <SelectPicker
+                        data={MATERIAS}
+                        placeholder=""
+                        className="w-[224]"
+                    />
+                </div>
             </form>
         </>
     );

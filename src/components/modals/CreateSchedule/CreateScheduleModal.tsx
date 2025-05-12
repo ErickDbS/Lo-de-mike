@@ -31,7 +31,7 @@ const FormComponent = () => {
                 onSubmit={handleSubmit(onSubmit)}
                 className="flex flex-col gap-4"
             >
-                <div className="justify-center gap-5">
+                <div className="flex justify-center gap-4">
                     <SelectPicker
                         data={[]}
                         placeholder="Grupo"
@@ -43,18 +43,35 @@ const FormComponent = () => {
                         className="w-[224]"
                     />
                 </div>
+
+                <div className="w-full flex flex-row">
+                    <div className="grid grid-cols-2 gap-2 w-3/10 justify-center text-sm">
+                        <p>Hora de inicio</p>
+                        <p>Hora de fin</p>
+                    </div>
+                    <div className="grid grid-cols-4 gap-2 w-full ml-2 justify-center text-sm">
+                        <p>Profesor</p>
+                        <p>Materia</p>
+                        <p>Tema</p>
+                        <p>Unidad</p>
+                    </div>
+                </div>
                 <GenerateNewScheduleRow />
                 {rows.map((_: any, idx: Key | null | undefined) => (
                     <GenerateNewScheduleRow key={idx} />
                 ))}
 
                 <a
-                    className="group cursor-pointer flex items-center"
+                    className="group cursor-pointer flex items-center justify-center flex-nowrap"
                     onClick={GenerateNewRow}
                     title="Agregar nueva linea"
                 >
-                    <div className="bg-white w-full h-px mr-2 group-hover:bg-blue-500 transition-colors" />
-                    <ListPlus className="group-hover:text-blue-500 transition-colors" />
+                    <div className="flex-1 h-px bg-white mr-2 group-hover:bg-blue-500 transition-colors" />
+                    <ListPlus className="group-hover:text-blue-500 transition-colors w-10" />
+                    <p className="text-sm whitespace-nowrap mx-2 group-hover:text-blue-500 ">
+                        Agregar nueva línea
+                    </p>
+                    <div className="flex-1 h-px bg-white ml-2 group-hover:bg-blue-500 transition-colors" />
                 </a>
 
                 <button
@@ -73,7 +90,7 @@ const showScheduleModal = () => {
         title: "Crear Nuevo Horario",
         theme: "dark",
         html: <FormComponent />,
-        width: "70%",
+        width: "90%",
         showCloseButton: true,
         showCancelButton: false,
         showConfirmButton: false,
