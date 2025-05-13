@@ -53,7 +53,9 @@ export default function GenerateNewScheduleRow({
             !!master &&
             !!subject &&
             !!topic &&
-            !!unit;
+            !!unit &&
+            !!groupId &&
+            !!classroomId;
 
         //En caso que si, cambiamos el estado a completo y realizamo el JSON  a enviar al padre.
         if (allFilled) {
@@ -68,8 +70,20 @@ export default function GenerateNewScheduleRow({
                 start_time: startTime,
                 end_time: endTime,
             });
+        } else {
+            setJson(undefined);
+            setIsComplete(false);
         }
-    }, [startTime, endTime, master, subject, topic, unit]);
+    }, [
+        startTime,
+        endTime,
+        master,
+        subject,
+        topic,
+        unit,
+        groupId,
+        classroomId,
+    ]);
 
     console.log("Datos completos?", isComplete, "Data", json);
 
