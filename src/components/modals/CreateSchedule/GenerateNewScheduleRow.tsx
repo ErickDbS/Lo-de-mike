@@ -88,8 +88,8 @@ export default function GenerateNewScheduleRow({
     console.log("Datos completos?", isComplete, "Data", json);
 
     return (
-        <>
-            <form className="flex flex-row justify-between w-full">
+        <div className="flex flex-col w-full">
+            <form className="flex flex-row justify-between w-full mb-3">
                 <div className="grid grid-cols-2 gap-2 w-3/10">
                     <TimePicker
                         className=""
@@ -138,10 +138,12 @@ export default function GenerateNewScheduleRow({
                 </div>
             </form>
             {isComplete ? (
-                <p className="text-green-500">✅ Campos completos</p>
+                <p className="text-green-500 text-sm">✅ Campos completos</p>
             ) : (
-                <p className="text-red-500">❌ Faltan campos por llenar</p>
+                <p className="text-red-500 text-sm">
+                    ❌ Faltan campos por llenar
+                </p>
             )}
-        </>
+        </div>
     );
 }

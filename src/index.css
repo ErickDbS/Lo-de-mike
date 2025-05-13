@@ -7,3 +7,17 @@
 .rs-anim-in {
     z-index: 9999 !important;
 }
+
+.rs-modal-xs,
+.rs-anim-bounce-in,
+.rs-modal {
+    z-index: 9999 !important;
+}
+
+.rs-modal-wrapper {
+    z-index: 99999 !important;
+}
+
+.rs-modal-dialog {
+    z-index: 99999 !important;
+}
