@@ -1,53 +1,95 @@
-import { useForm } from "react-hook-form";
 import TimePicker from "rsuite/esm/TimePicker";
 import "rsuite/TimePicker/styles/index.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SelectPicker from "rsuite/SelectPicker";
 import "rsuite/SelectPicker/styles/index.css";
 
-interface Materias {
+interface Props {
+    groupId: string;
+    classroomId: string;
+}
+
+interface Data {
     value: string;
     label: string;
 }
 
-const MATERIAS: Materias[] = [
+const MATERIAS: Data[] = [
     { value: "1", label: "SISTEMAS OPERATIVOS" },
     { value: "2", label: "MATEMÁTICAS DISCRETAS" },
     { value: "3", label: "PROGRAMACIÓN II" },
     { value: "4", label: "REDES I" },
 ];
 
-export default function GenerateNewScheduleRow() {
-    const { register, handleSubmit } = useForm();
-    const [time, setTime] = useState<any>();
+const formatTime = (date: Date | null): string => {
+    if (!date) return "";
+    return date.toLocaleTimeString("en-GB", {
+        hour12: false,
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+    });
+};
 
-    console.log("time", time);
-    const onSubmit = (data: object) => {
-        console.log(data);
-    };
+export default function GenerateNewScheduleRow({
+    groupId,
+    classroomId,
+}: Props) {
+    //datos
+    const [startTime, setStartTime] = useState<any>();
+    const [endTime, setEndTime] = useState<any>();
+    const [master, setMaster] = useState<any>();
+    const [subject, setSubject] = useState<any>();
+    const [topic, setTopic] = useState<any>();
+    const [unit, setUnit] = useState<any>();
+    const [isComplete, setIsComplete] = useState<boolean>(false);
+    const [json, setJson] = useState<object>();
+
+    useEffect(() => {
+        // Verificar si todos los datos estan completos
+        const allFilled =
+            !!startTime &&
+            !!endTime &&
+            !!master &&
+            !!subject &&
+            !!topic &&
+            !!unit;
+
+        //En caso que si, cambiamos el estado a completo y realizamo el JSON  a enviar al padre.
+        if (allFilled) {
+            setIsComplete(allFilled);
+            setJson({
+                group_id: groupId,
+                classroom_id: classroomId,
+                subject_id: subject,
+                master_id: master,
+                topic_id: topic,
+                unit_id: unit,
+                start_time: startTime,
+                end_time: endTime,
+            });
+        }
+    }, [startTime, endTime, master, subject, topic, unit]);
+
+    console.log("Datos completos?", isComplete, "Data", json);
 
     return (
         <>
-            <form
-                onSubmit={handleSubmit(onSubmit)}
-                className="flex flex-row justify-between w-full"
-            >
+            <form className="flex flex-row justify-between w-full">
                 <div className="grid grid-cols-2 gap-2 w-3/10">
                     <TimePicker
                         className=""
                         format="hh:mm aa"
                         showMeridiem
-                        value={time}
                         container={document.body}
-                        onChange={(value) => setTime(value)}
+                        onChange={(value) => setStartTime(formatTime(value))}
                     />
                     <TimePicker
                         className=""
                         format="hh:mm aa"
                         showMeridiem
-                        value={time}
                         container={document.body}
-                        onChange={(value) => setTime(value)}
+                        onChange={(value) => setEndTime(formatTime(value))}
                     />
                 </div>
                 <div className="grid grid-cols-4 gap-2 w-full ml-2">
@@ -55,24 +97,37 @@ export default function GenerateNewScheduleRow() {
                         data={MATERIAS}
                         placeholder=""
                         className="w-[224]"
+                        value={master}
+                        onChange={(value) => setMaster(value)}
                     />
                     <SelectPicker
                         data={MATERIAS}
                         placeholder=""
                         className="w-[224]"
+                        value={subject}
+                        onChange={(value) => setSubject(value)}
                     />
                     <SelectPicker
                         data={MATERIAS}
                         placeholder=""
                         className="w-[224]"
+                        value={topic}
+                        onChange={(value) => setTopic(value)}
                     />
                     <SelectPicker
                         data={MATERIAS}
                         placeholder=""
                         className="w-[224]"
+                        value={unit}
+                        onChange={(value) => setUnit(value)}
                     />
                 </div>
             </form>
+            {isComplete ? (
+                <p className="text-green-500">✅ Campos completos</p>
+            ) : (
+                <p className="text-red-500">❌ Faltan campos por llenar</p>
+            )}
         </>
     );
 }

@@ -9,13 +9,35 @@ import SelectPicker from "rsuite/SelectPicker";
 import "rsuite/SelectPicker/styles/index.css";
 
 const MySwal = withReactContent(Swal);
+
 interface Row {
     id: number;
 }
 
+interface Data {
+    value: string;
+    label: string;
+}
+
+const GRUPOS: Data[] = [
+    { value: "1", label: "401" },
+    { value: "2", label: "204" },
+    { value: "3", label: "403" },
+    { value: "4", label: "202" },
+];
+
+const SALONES: Data[] = [
+    { value: "1", label: "Aula 1" },
+    { value: "2", label: "Aula 2" },
+    { value: "3", label: "Aula 3" },
+    { value: "4", label: "Aula 4" },
+];
+
 const FormComponent = () => {
-    const { register, handleSubmit } = useForm();
+    const { handleSubmit } = useForm();
     const [rows, setRows] = useState<Row[]>([]);
+    const [groupId, setGroupId] = useState<any>();
+    const [classroomId, setClassroomId] = useState<any>();
 
     const onSubmit = (data: object) => {
         console.log(data);
@@ -33,14 +55,16 @@ const FormComponent = () => {
             >
                 <div className="flex justify-center gap-4">
                     <SelectPicker
-                        data={[]}
+                        data={GRUPOS}
                         placeholder="Grupo"
                         className="w-[224]"
+                        onChange={(value) => setGroupId(value)}
                     />
                     <SelectPicker
-                        data={[]}
+                        data={SALONES}
                         placeholder="Salón"
                         className="w-[224]"
+                        onChange={(value) => setClassroomId(value)}
                     />
                 </div>
 
@@ -56,9 +80,16 @@ const FormComponent = () => {
                         <p>Unidad</p>
                     </div>
                 </div>
-                <GenerateNewScheduleRow />
+                <GenerateNewScheduleRow
+                    groupId={groupId}
+                    classroomId={classroomId}
+                />
                 {rows.map((_: any, idx: Key | null | undefined) => (
-                    <GenerateNewScheduleRow key={idx} />
+                    <GenerateNewScheduleRow
+                        groupId={groupId}
+                        classroomId={classroomId}
+                        key={idx}
+                    />
                 ))}
 
                 <a
