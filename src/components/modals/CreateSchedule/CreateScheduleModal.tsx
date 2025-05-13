@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { CalendarPlus, ListPlus, Delete } from "lucide-react";
 import { useForm } from "react-hook-form";
 import GenerateNewScheduleRow from "./GenerateNewScheduleRow";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import SelectPicker from "rsuite/SelectPicker";
 import "rsuite/SelectPicker/styles/index.css";
 
@@ -18,6 +18,28 @@ interface Data {
     value: string;
     label: string;
 }
+interface RowData {
+    id: number;
+    isComplete: boolean;
+    data?: object;
+}
+
+const grupos: Data[] = [
+    { value: "1", label: "201" },
+    { value: "2", label: "202" },
+    { value: "3", label: "203" },
+    { value: "4", label: "204" },
+    { value: "5", label: "205" },
+];
+
+// Opciones de Salón
+const salones: Data[] = [
+    { value: "1", label: "Aula 1" },
+    { value: "2", label: "Aula 2" },
+    { value: "3", label: "Aula 3" },
+    { value: "4", label: "Aula 4" },
+    { value: "5", label: "Aula 5" },
+];
 
 const FormComponent = () => {
     const { handleSubmit } = useForm();
@@ -26,6 +48,8 @@ const FormComponent = () => {
     const [classroomId, setClassroomId] = useState<any>();
     const [groups, setGroups] = useState<any>();
     const [classrooms, setClassrooms] = useState<any>();
+    const [isComplete, setIsComplete] = useState<boolean>(false);
+    const [rowsData, setRowsData] = useState<RowData[]>([]);
 
     // Carga inicial de grupos y salones
     useEffect(() => {
@@ -56,18 +80,50 @@ const FormComponent = () => {
         loadMeta();
     }, []);
 
+    const handleRowChange = useCallback(
+        (id: number, isComplete: boolean, data?: any) => {
+            setRowsData((old) => {
+                const copy = [...old];
+                const idx = copy.findIndex((r) => r.id === id);
+                if (idx >= 0) {
+                    copy[idx] = { id, isComplete, data };
+                }
+                return copy;
+            });
+        },
+        []
+    );
+
+    console.log("Rows data", rowsData);
+
+    //Verificar salon y grupo
+    useEffect(() => {
+        const allRowsComplete =
+            !!groupId &&
+            !!classroomId &&
+            rowsData.length === rows.length &&
+            rowsData.every((r) => r.isComplete);
+
+        setIsComplete(allRowsComplete);
+    }, [groupId, classroomId, rowsData]);
+
     const onSubmit = (data: object) => {
         console.log(data);
     };
 
     const GenerateNewRow = () => {
-        setRows((prev) => [...prev, { id: prev.length }]);
+        const newId = rows.length;
+        setRows((prev) => [...prev, { id: newId }]);
+        setRowsData((prev) => [
+            ...prev,
+            { id: newId, isComplete: false, data: undefined },
+        ]);
     };
 
-    // Dentro de FormComponent:
-    const deleteRow = async (rowId: number) => {
-        if (confirm("¿Está seguro que desea eliminar la fila?"))
-            setRows((prev) => prev.filter((row) => row.id !== rowId));
+    const deleteRow = (rowId: number) => {
+        if (!confirm("¿Seguro?")) return;
+        setRows((prev) => prev.filter((r) => r.id !== rowId));
+        setRowsData((prev) => prev.filter((r) => r.id !== rowId));
     };
 
     return (
@@ -78,18 +134,23 @@ const FormComponent = () => {
             >
                 <div className="flex justify-center gap-4">
                     <SelectPicker
-                        data={groups}
+                        data={grupos}
                         placeholder="Grupo"
                         className="w-[224]"
                         onChange={(value) => setGroupId(value)}
                     />
                     <SelectPicker
-                        data={classrooms}
+                        data={salones}
                         placeholder="Salón"
                         className="w-[224]"
                         onChange={(value) => setClassroomId(value)}
                     />
                 </div>
+                {!isComplete && (
+                    <p className="text-red-500 text-sm">
+                        ❌ Grupo y salón es requerido.
+                    </p>
+                )}
 
                 <div className="w-full flex flex-row ">
                     <div className="grid grid-cols-2 gap-2 w-3/10 justify-center text-sm">
@@ -103,18 +164,24 @@ const FormComponent = () => {
                         <p>Unidad</p>
                     </div>
                 </div>
-                <div className="mr-7">
+                {/* <div className="mr-7">
                     <GenerateNewScheduleRow
+                        key={0}
+                        id={0}
                         groupId={groupId}
                         classroomId={classroomId}
+                        onChange={handleRowChange}
                     />
-                </div>
+                </div> */}
 
                 {rows.map((row) => (
                     <div key={row.id} className="flex flex-row">
                         <GenerateNewScheduleRow
+                            key={row.id}
+                            id={row.id}
                             groupId={groupId}
                             classroomId={classroomId}
+                            onChange={handleRowChange}
                         />
                         <button
                             onClick={() => deleteRow(row.id)}
@@ -141,7 +208,8 @@ const FormComponent = () => {
 
                 <button
                     type="submit"
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded cursor-pointer"
+                    disabled={!isComplete}
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded cursor-pointer disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
                     Guardar
                 </button>

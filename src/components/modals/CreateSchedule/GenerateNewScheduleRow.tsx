@@ -5,8 +5,10 @@ import SelectPicker from "rsuite/SelectPicker";
 import "rsuite/SelectPicker/styles/index.css";
 
 interface Props {
+    id: number;
     groupId: string;
     classroomId: string;
+    onChange: any;
 }
 
 interface Data {
@@ -32,8 +34,10 @@ const formatTime = (date: Date | null): string => {
 };
 
 export default function GenerateNewScheduleRow({
+    id,
     groupId,
     classroomId,
+    onChange,
 }: Props) {
     //datos
     const [startTime, setStartTime] = useState<any>();
@@ -46,34 +50,32 @@ export default function GenerateNewScheduleRow({
     const [json, setJson] = useState<object>();
 
     useEffect(() => {
-        // Verificar si todos los datos estan completos
         const allFilled =
+            !!groupId &&
+            !!classroomId &&
             !!startTime &&
             !!endTime &&
             !!master &&
             !!subject &&
             !!topic &&
-            !!unit &&
-            !!groupId &&
-            !!classroomId;
+            !!unit;
 
-        //En caso que si, cambiamos el estado a completo y realizamo el JSON  a enviar al padre.
-        if (allFilled) {
-            setIsComplete(allFilled);
-            setJson({
-                group_id: groupId,
-                classroom_id: classroomId,
-                subject_id: subject,
-                master_id: master,
-                topic_id: topic,
-                unit_id: unit,
-                start_time: startTime,
-                end_time: endTime,
-            });
-        } else {
-            setJson(undefined);
-            setIsComplete(false);
-        }
+        const payload = allFilled
+            ? {
+                  group_id: groupId,
+                  classroom_id: classroomId,
+                  subject_id: subject,
+                  master_id: master,
+                  topic_id: topic,
+                  unit_id: unit,
+                  start_time: startTime,
+                  end_time: endTime,
+              }
+            : undefined;
+
+        setIsComplete(allFilled);
+        setJson(payload);
+        onChange(id, allFilled, payload);
     }, [
         startTime,
         endTime,
@@ -83,9 +85,11 @@ export default function GenerateNewScheduleRow({
         unit,
         groupId,
         classroomId,
+        id,
+        onChange,
     ]);
 
-    console.log("Datos completos?", isComplete, "Data", json);
+    // console.log("Datos completos?", isComplete, "Data", json);
 
     return (
         <div className="flex flex-col w-full">
