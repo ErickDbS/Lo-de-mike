@@ -24,6 +24,11 @@ export default function Navbar() {
                 label: "Historial de Clases",
                 title: "Ver las clases pasadas y asistencia del profesores.",
             },
+            {
+                path: "/assists",
+                label: "Asistencias de los profesores",
+                title: "Marcar asistencias de los profesores.",
+            },
         ],
         2: [
             {

@@ -1,14 +1,15 @@
-import { Check, X } from 'lucide-react';
+import { Check, X, List } from 'lucide-react';
 import { useEffect } from 'react';
 import { useState } from 'react';
 
 interface PersonalCardProps {
     nameProfesor: string;
     nameMateria: string;
+    Tema:string;
     Hora:string;
 }
 
-export default function PersonalCard({ nameMateria, nameProfesor, Hora }: PersonalCardProps) {
+export default function PersonalCard({ nameMateria, nameProfesor, Hora, Tema }: PersonalCardProps) {
     const [isActive, setIsActive] = useState(false);
 
     useEffect(() => {
@@ -41,13 +42,14 @@ export default function PersonalCard({ nameMateria, nameProfesor, Hora }: Person
                 <div className="text-xl space-y-2">
                     <p><strong className="text-blue-800">Materia:</strong> {nameMateria}</p>
                     <p><strong className="text-blue-800">Profesor:</strong> {nameProfesor}</p>
+                    <p><strong className="text-blue-800">Tema:</strong> {Tema}</p>
                     <p><strong className="text-blue-800">Hora:</strong> {Hora}</p>
                 </div>
                 <div className="flex justify-center gap-4">
                     <button
                         type="button"
                         disabled={!isActive}
-                        className={`px-4 py-2 rounded-xl text-xl transition flex items-center gap-2
+                        className={`px-4 py-2 rounded-xl text-xl transition flex items-center gap-2 cursor-pointer
                             ${isActive ? "bg-green-600 hover:bg-green-700 text-white" : "bg-gray-400 cursor-not-allowed text-gray-200"}
                         `}
                     >
@@ -57,7 +59,7 @@ export default function PersonalCard({ nameMateria, nameProfesor, Hora }: Person
                     <button
                         type="button"
                         disabled={!isActive}
-                        className={`px-4 py-2 rounded-xl text-xl transition flex items-center gap-2
+                        className={`px-4 py-2 rounded-xl text-xl transition flex items-center gap-2 cursor-pointer
                             ${isActive ? "bg-red-600 hover:bg-red-700 text-white" : "bg-gray-400 cursor-not-allowed text-gray-200"}
                         `}
                     >
@@ -66,7 +68,7 @@ export default function PersonalCard({ nameMateria, nameProfesor, Hora }: Person
                     <button
                         type="button"
                         disabled={!isActive}
-                        className={`px-4 py-2 rounded-xl text-xl transition flex items-center gap-2
+                        className={`px-4 py-2 rounded-xl text-xl transition flex items-center gap-2 cursor-pointer
                             ${isActive ? "bg-yellow-600 hover:bg-yellow-700 text-white" : "bg-gray-400 cursor-not-allowed text-gray-200"}
                         `}
                     >

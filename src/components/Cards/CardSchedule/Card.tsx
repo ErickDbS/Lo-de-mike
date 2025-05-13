@@ -1,10 +1,12 @@
 interface CardProps {
     nameProfesor: string;
     nameMateria: string;
+    Tema:string;
     Hora: string;
+    mostrarBoton: boolean;
 }
 
-export default function Card({ nameProfesor, nameMateria, Hora }: CardProps) {
+export default function Card({ nameProfesor, nameMateria, Hora, Tema, mostrarBoton }: CardProps) {
     return (
         <>
             <div className="grid place-items-center">
@@ -24,17 +26,25 @@ export default function Card({ nameProfesor, nameMateria, Hora }: CardProps) {
                         </p>
                         <p>
                             <strong className="pt-1 text-blue-800">
+                                Tema:{" "}
+                            </strong>{" "}
+                            {Tema}
+                        </p>
+                        <p>
+                            <strong className="pt-1 text-blue-800">
                                 Hora:{" "}
                             </strong>{" "}
                             {Hora}
                         </p>
                     </div>
-                    <button
-                        type="submit"
-                        className="bg-blue-800 p-5 mt-3 mb-3 rounded-xl cursor-pointer text-xl hover:bg-blue-900 transition"
-                    >
-                        Marcar Asistencia
-                    </button>
+                    {mostrarBoton && (
+                        <button
+                        type="submit" 
+                        className="mt-4 mb-4 px-4 py-2 bg-blue-800 rounded-[10px] text-3xl cursor-pointer hover:bg-blue-900"
+                        >
+                            Marcar asistencia
+                        </button>
+                    )}
                 </div>
             </div>
         </>
