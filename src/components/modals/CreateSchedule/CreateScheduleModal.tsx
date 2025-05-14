@@ -21,23 +21,31 @@ interface Row {
     id: number;
 }
 
-interface Data {
-    value: string;
-    label: string;
+interface GrupoRaw {
+    group_id: string;
+    name: string;
+    grade_level: number;
+    active: string;
+    created_at: Date | null;
+    updated_at: Date | null;
 }
+
+interface classroomsData {
+    id: number;
+    name: string;
+    active: string;
+}
+
 interface RowData {
     id: number;
     isComplete: boolean;
     data?: object;
 }
 
-const grupos: Data[] = [
-    { value: "1", label: "201" },
-    { value: "2", label: "202" },
-    { value: "3", label: "203" },
-    { value: "4", label: "204" },
-    { value: "5", label: "205" },
-];
+interface Data {
+    value: string;
+    label: string;
+}
 
 // Opciones de Salón
 const salones: Data[] = [
@@ -66,23 +74,40 @@ const FormComponent = () => {
             try {
                 const [gRes, sRes] = await Promise.all([
                     fetch("https://schedulechecker.up.railway.app/api/groups"),
-                    fetch("https://schedulechecker.up.railway.app/api/groups"),
+                    fetch(
+                        "https://schedulechecker.up.railway.app/api/classrooms"
+                    ),
                 ]);
                 if (!gRes.ok || !sRes.ok) {
                     throw new Error("Error al cargar datos");
                 }
-                const gruposJson = await gRes.json();
-                const salonesJson = await sRes.json();
-                setGroups(gruposJson);
-                setClassrooms(salonesJson);
+                // GRUPOS
+                const groupsJson = await gRes.json();
+                const groupsFormat = groupsJson.groups.map(
+                    (data: GrupoRaw) => ({
+                        label: data.name,
+                        value: data.group_id,
+                    })
+                );
+                setGroups(groupsFormat);
+
+                // SALONES
+                const classroomsJson = await sRes.json();
+                const classroomsFormat = classroomsJson.classrooms.map(
+                    (data: classroomsData) => ({
+                        label: data.name,
+                        value: data.id,
+                    })
+                );
+                setClassrooms(classroomsFormat);
             } catch (err) {
                 console.error(err);
-                // Swal.fire({
-                //     theme: "dark",
-                //     icon: "error",
-                //     title: "Oops...",
-                //     text: "Error al cargar los datos! Intente más tarde.",
-                // });
+                Swal.fire({
+                    theme: "dark",
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Error al cargar los datos! Intente más tarde.",
+                });
             }
         }
 
@@ -127,11 +152,11 @@ const FormComponent = () => {
         });
     };
 
-    useEffect(() => {
-        if (data) {
-            Swal.fire("Horario creado exitosamente", "success");
-        }
-    }, [data]);
+    // useEffect(() => {
+    //     if (data) {
+    //         Swal.fire("Horario creado exitosamente", "success");
+    //     }
+    // }, [data]);
 
     useEffect(() => {
         if (fetchError) {
@@ -175,13 +200,13 @@ const FormComponent = () => {
                         </div>
                     )}
                     <SelectPicker
-                        data={grupos}
+                        data={groups}
                         placeholder="Grupo"
                         className="w-[224]"
                         onChange={(value) => setGroupId(value)}
                     />
                     <SelectPicker
-                        data={salones}
+                        data={classrooms}
                         placeholder="Salón"
                         className="w-[224]"
                         onChange={(value) => setClassroomId(value)}
@@ -196,8 +221,8 @@ const FormComponent = () => {
                     <div className="mr-7 grid grid-cols-4 gap-2 w-full ml-2 justify-center text-sm font-bold">
                         <p>Profesor</p>
                         <p>Materia</p>
-                        <p>Tema</p>
                         <p>Unidad</p>
+                        <p>Tema</p>
                     </div>
                 </div>
 

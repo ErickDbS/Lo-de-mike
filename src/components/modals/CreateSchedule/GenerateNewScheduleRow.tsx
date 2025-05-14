@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import SelectPicker from "rsuite/SelectPicker";
 import "rsuite/SelectPicker/styles/index.css";
 import { CircleCheck, CircleX } from "lucide-react";
+import Swal from "sweetalert2";
 
 interface Props {
     id: number;
@@ -16,6 +17,31 @@ interface Data {
     value: string;
     label: string;
 }
+
+interface MastersData {
+    master_id: number;
+    name: string;
+    lastname: string;
+    acronym: string;
+    active: string;
+}
+
+interface SubjectsData {
+    subject_id: number;
+    name: string;
+    code: number;
+    description: string;
+    credits: number;
+    hours: number;
+    semester: number;
+    plan_year: number;
+    career_id: number;
+    active: string;
+}
+
+interface UnitsData {}
+
+interface topicsData {}
 
 const MATERIAS: Data[] = [
     { value: "1", label: "SISTEMAS OPERATIVOS" },
@@ -50,6 +76,72 @@ export default function GenerateNewScheduleRow({
     const [isComplete, setIsComplete] = useState<boolean>(false);
     const [json, setJson] = useState<object>();
     const [allFilledRow, setAllFilledRow] = useState<boolean>(false);
+
+    //States data
+    const [masters, setMasters] = useState<any>();
+    const [subjects, setSubjects] = useState<any>();
+    const [topics, setTopics] = useState<any>();
+    const [units, setUnits] = useState<any>();
+
+    // Carga inicial de los datos
+    useEffect(() => {
+        async function loadMeta() {
+            try {
+                const [mastersRes, subjectsRes] = await Promise.all([
+                    fetch("https://schedulechecker.up.railway.app/api/masters"),
+                    fetch(
+                        "https://schedulechecker.up.railway.app/api/subjects"
+                    ),
+                    // fetch(
+                    //     "https://schedulechecker.up.railway.app/api/units/subjects/"
+                    // ),
+                ]);
+                // if (!gRes.ok || !sRes.ok) {
+                //     throw new Error("Error al cargar datos");
+                // }
+                // MAESTROS
+                const mastersJson = await mastersRes.json();
+                const mastersFormat = mastersJson.masters.map(
+                    (data: MastersData) => ({
+                        label: `${data.acronym} ${data.lastname} ${data.name} `,
+                        value: data.master_id,
+                    })
+                );
+                setMasters(mastersFormat);
+
+                // MATERIAS
+                const subjectsJson = await subjectsRes.json();
+                const subjectsFormat = subjectsJson.subjects.map(
+                    (data: SubjectsData) => ({
+                        label: data.name,
+                        value: data.subject_id,
+                    })
+                );
+                setSubjects(subjectsFormat);
+                // TEMAS
+
+                // UNIDADES
+                // const unitsJson = await unitsRes.json();
+                // const unitsFormat = unitsJson.subjects.map(
+                //     (data: SubjectsData) => ({
+                //         label: data.name,
+                //         value: data.subject_id,
+                //     })
+                // );
+                // setUnits(unitsFormat);
+            } catch (err) {
+                console.error(err);
+                Swal.fire({
+                    theme: "dark",
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Error al cargar los datos! Intente más tarde.",
+                });
+            }
+        }
+
+        loadMeta();
+    }, []);
 
     useEffect(() => {
         const allFilled =
@@ -132,14 +224,14 @@ export default function GenerateNewScheduleRow({
                 </div>
                 <div className="grid grid-cols-4 gap-2 w-full ml-2">
                     <SelectPicker
-                        data={MATERIAS}
+                        data={masters}
                         placeholder=""
                         className="w-[224]"
                         value={master}
                         onChange={(value) => setMaster(value)}
                     />
                     <SelectPicker
-                        data={MATERIAS}
+                        data={subjects}
                         placeholder=""
                         className="w-[224]"
                         value={subject}
