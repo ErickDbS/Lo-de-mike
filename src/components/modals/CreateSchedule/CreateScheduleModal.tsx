@@ -42,20 +42,6 @@ interface RowData {
     data?: object;
 }
 
-interface Data {
-    value: string;
-    label: string;
-}
-
-// Opciones de Salón
-const salones: Data[] = [
-    { value: "1", label: "Aula 1" },
-    { value: "2", label: "Aula 2" },
-    { value: "3", label: "Aula 3" },
-    { value: "4", label: "Aula 4" },
-    { value: "5", label: "Aula 5" },
-];
-
 const FormComponent = () => {
     const { handleSubmit } = useForm();
     const [rows, setRows] = useState<Row[]>([]);
@@ -65,7 +51,7 @@ const FormComponent = () => {
     const [classrooms, setClassrooms] = useState<any>();
     const [isComplete, setIsComplete] = useState<boolean>(false);
     const [rowsData, setRowsData] = useState<RowData[]>([]);
-    const { data, error: fetchError, doFetch, loading } = useFetch(null, null);
+    const { data, error: fetchError, doFetch } = useFetch(null, null);
 
     // Carga inicial de grupos y salones
     useEffect(() => {
@@ -144,6 +130,7 @@ const FormComponent = () => {
         const validPayloads = rowsData
             .map((r) => r.data)
             .filter((d): d is object => d !== undefined);
+        console.log(validPayloads);
 
         doFetch("https://schedulechecker.up.railway.app/api/class", {
             method: "POST",
@@ -152,19 +139,15 @@ const FormComponent = () => {
         });
     };
 
-    // useEffect(() => {
-    //     if (data) {
-    //         Swal.fire("Horario creado exitosamente", "success");
-    //     }
-    // }, [data]);
+    useEffect(() => {
+        if (data) {
+            Swal.fire("Horario creado exitosamente", "success");
+        }
+    }, [data]);
 
     useEffect(() => {
         if (fetchError) {
-            Swal.fire({
-                icon: "error",
-                title: "Error al crear el horario.",
-                text: fetchError.message,
-            });
+            confirm(`${fetchError.message}: ${fetchError.errors}`);
         }
     }, [fetchError]);
 
