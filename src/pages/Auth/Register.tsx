@@ -6,6 +6,11 @@ import { useFetch } from "../../hooks/useFetch";
 import { useForm } from "react-hook-form";
 import { AuthContext } from "../../utils/authContext";
 
+interface Group {
+    group_id: number;
+    name: string;
+}
+
 interface RegisterResponse {
     message: string;
     user: { id: number; username: string };
@@ -17,18 +22,26 @@ export default function Register() {
     const [error, setError] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [selectedRole, setSelectedRole] = useState("");
+    const [selectedGroup, setSelectedGroup] = useState("");
     const navigate = useNavigate();
 
-    // Hook para uso de formulario
+    // Obtener grupos
+    const {
+        data: groupsResponse,
+    } = useFetch<{ groups: Group[] }>("https://schedulechecker.up.railway.app/api/groups", {
+        method: "GET",
+    });
+
     const {
         register,
         getValues,
         watch,
         handleSubmit,
+        setValue,
         formState: { errors, isValid },
     } = useForm();
 
-    // Hook para la peticion http
     const {
         data,
         error: fetchError,
@@ -38,7 +51,6 @@ export default function Register() {
 
     useEffect(() => {
         if (data) {
-            console.log(data);
             Swal.fire({
                 icon: "success",
                 title: "¡Registro exitoso!",
@@ -50,9 +62,8 @@ export default function Register() {
                     lastname: getValues("lastname"),
                     role: getValues("role_id"),
                 });
+                navigate("/home");
             });
-
-            navigate("/home");
         }
     }, [data, navigate]);
 
@@ -61,7 +72,7 @@ export default function Register() {
             Swal.fire({
                 icon: "error",
                 title: "Error al registrar",
-                text: fetchError.errors.username,
+                text: fetchError.errors?.username || "Error al crear cuenta.",
             });
         }
     }, [fetchError]);
@@ -72,162 +83,134 @@ export default function Register() {
     };
 
     const validatePasswords = (password: string, confirmPassword: string) => {
-        if (password != confirmPassword) {
+        if (password !== confirmPassword) {
             setError("Las contraseñas no coinciden");
         } else {
             setError("");
         }
     };
 
-    const onSubmit = (data: object) => {
+    const onSubmit = (formData: any) => {
+        if (selectedRole === "1") {
+            formData.group_id = selectedGroup;
+    
+            const selectedGroupObject = groupsResponse?.groups.find(
+                (group) => group.group_id.toString() === selectedGroup
+            );
+    
+            if (selectedGroupObject) {
+                localStorage.setItem("group_name", selectedGroupObject.name);
+            }
+        }
+    
         doFetch("https://schedulechecker.up.railway.app/api/users", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
+            body: JSON.stringify(formData),
         });
     };
+    
 
     return (
         <>
-            <nav className="h-16 w-full bg-blue-800 flex flex-row justify-left items-center px-20">
+            <nav className="h-16 w-full bg-blue-800 flex items-center px-20">
                 <CalendarDays className="text-white h-10 w-10" />
                 <h1 className="text-white text-2xl ml-2">Mike's Schedules</h1>
             </nav>
-            <div className="min-h-[calc(100vh-4rem)] flex flex-col justify-center items-center">
+
+            <div className="min-h-[calc(100vh-4rem)] flex justify-center items-center">
                 <form
                     onSubmit={handleSubmit(onSubmit)}
                     className="grid gap-3 border-4 w-96 p-6 bg-[#1e2022] shadow-md rounded-md border-[1px] border-gray-400"
                 >
-                    <h2 className="grid text-4xl place-items-center text-blue-400 mb-2">
+                    <h2 className="text-4xl text-blue-400 text-center mb-2">
                         Crear Cuenta
                     </h2>
-                    {/* Campos de Nombre y Apellido */}
+
                     <div className="flex">
                         <div className="flex flex-col">
                             <input
                                 type="text"
-                                className="w-38 p-2 mr-2 border rounded-md placeholder:text-gray-400 placeholder:italic text-white"
+                                className="w-38 p-2 mr-2 border rounded-md placeholder:text-gray-400 text-white"
                                 placeholder="Nombre"
-                                {...register("name", {
-                                    required: true,
-                                })}
+                                {...register("name", { required: true })}
                             />
-                            {errors.name?.type === "required" && (
-                                <span className="text-red-500">
-                                    Campo requerido.
-                                </span>
+                            {errors.name && (
+                                <span className="text-red-500">Campo requerido.</span>
                             )}
                         </div>
                         <div className="flex flex-col">
                             <input
                                 type="text"
-                                className="w-38 p-2 ml-2 border rounded-md placeholder:text-gray-400 placeholder:italic text-white"
+                                className="w-38 p-2 ml-2 border rounded-md placeholder:text-gray-400 text-white"
                                 placeholder="Apellido Paterno"
-                                {...register("lastname", {
-                                    required: true,
-                                })}
+                                {...register("lastname", { required: true })}
                             />
-                            {errors.lastname?.type === "required" && (
-                                <span className="ml-2 text-red-500">
-                                    Campo requerido.
-                                </span>
+                            {errors.lastname && (
+                                <span className="ml-2 text-red-500">Campo requerido.</span>
                             )}
                         </div>
                     </div>
-                    {/* Campo Nombre de Usuario */}
+
                     <input
                         type="text"
-                        className="w-80 p-2 border rounded-md placeholder:text-gray-400 placeholder:italic text-white"
+                        className="w-80 p-2 border rounded-md placeholder:text-gray-400 text-white"
                         placeholder="Nombre de usuario"
-                        {...register("username", {
-                            required: true,
-                        })}
+                        {...register("username", { required: true })}
                     />
-                    {errors.username?.type === "required" && (
-                        <span className="text-red-500">
-                            Nombre de usuario requerido.
-                        </span>
+                    {errors.username && (
+                        <span className="text-red-500">Nombre de usuario requerido.</span>
                     )}
 
-                    {/* Campo de contraseña con botón para mostrar/ocultar */}
                     <div className="relative w-80">
-                        <label className="font-bold text-white">
-                            Contraseña
-                        </label>
+                        <label className="font-bold text-white">Contraseña</label>
                         <input
                             className="w-full p-2 border rounded-md placeholder:text-gray-400 pr-10 text-white"
                             type={showPassword ? "text" : "password"}
                             placeholder="******"
-                            {...register("password", {
-                                required: true,
-                                minLength: 8,
-                            })}
+                            {...register("password", { required: true, minLength: 8 })}
                         />
                         <button
                             type="button"
-                            className="absolute right-3 top-9 text-white hover:text-gray-200 cursor-pointer"
+                            className="absolute right-3 top-9 text-white hover:text-gray-200"
                             onClick={() => setShowPassword(!showPassword)}
                         >
-                            {showPassword ? (
-                                <EyeOff size={20} />
-                            ) : (
-                                <Eye size={20} />
-                            )}
+                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                         </button>
                     </div>
                     {errors.password?.type === "required" && (
-                        <span className="text-red-500">
-                            Ingrese una contraseña.
-                        </span>
+                        <span className="text-red-500">Ingrese una contraseña.</span>
                     )}
                     {errors.password?.type === "minLength" && (
-                        <span className="text-red-500">
-                            La contraseña debe tener un mínimo de 8 caracteres.
-                        </span>
+                        <span className="text-red-500">Mínimo 8 caracteres.</span>
                     )}
 
-                    {/* Campo de confirmación de contraseña con botón para mostrar/ocultar */}
                     <div className="relative w-80">
-                        <label
-                            htmlFor="password"
-                            className=" font-bold text-white"
-                        >
-                            Confirmar Contraseña
-                        </label>
+                        <label className="font-bold text-white">Confirmar Contraseña</label>
                         <input
                             type={showConfirmPassword ? "text" : "password"}
                             value={confirmPassword}
-                            onChange={(e) =>
-                                handleConfirmPassword(e.target.value)
-                            }
+                            onChange={(e) => handleConfirmPassword(e.target.value)}
                             className="w-full p-2 border rounded-md placeholder:text-gray-400 pr-10 text-white"
                             required
                             placeholder="******"
-                            name="password"
                         />
                         <button
                             type="button"
-                            className="absolute right-3 top-9 text-white hover:text-gray-200 cursor-pointer"
-                            onClick={() =>
-                                setShowConfirmPassword(!showConfirmPassword)
-                            }
+                            className="absolute right-3 top-9 text-white hover:text-gray-200"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                         >
-                            {showConfirmPassword ? (
-                                <EyeOff size={20} />
-                            ) : (
-                                <Eye size={20} />
-                            )}
+                            {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                         </button>
                     </div>
                     {error && <span className="text-red-500">{error}</span>}
 
-                    {/* Campo para el tipo de usuario */}
+                    {/* Tipo de usuario */}
                     <select
                         defaultValue=""
                         className="border-1 border-white text-white rounded-md h-11 mt-2 px-2 cursor-pointer w-80"
-                        {...register("role_id", {
-                            required: true,
-                        })}
+                        {...register("role_id", { required: true })}
+                        onChange={(e) => setSelectedRole(e.target.value)}
                     >
                         <option value="" disabled hidden>
                             Selecciona un tipo de usuario
@@ -237,8 +220,27 @@ export default function Register() {
                         <option value="3">Checador</option>
                         <option value="4">Jef@ de Carrera</option>
                     </select>
+
+                    {/* Selector de grupo visible solo si es jefe de grupo */}
+                    {selectedRole === "1" && (
+                        <select
+                            className="border-1 border-white text-white rounded-md h-11 mt-2 px-2 cursor-pointer w-80"
+                            value={selectedGroup}
+                            onChange={(e) => setSelectedGroup(e.target.value)}
+                        >
+                            <option value="" disabled>
+                                Selecciona tu grupo
+                            </option>
+                            {groupsResponse?.groups.map((group) => (
+                                <option key={group.group_id} value={group.group_id}>
+                                    {group.name}
+                                </option>
+                            ))}
+                        </select>
+                    )}
+
                     <button
-                        className={`mt-5 py-2 rounded-md transition-colors  ${
+                        className={`mt-5 py-2 rounded-md transition-colors ${
                             error ||
                             !watch("password") ||
                             !confirmPassword ||
@@ -251,18 +253,13 @@ export default function Register() {
                     >
                         {loading ? "Cargando..." : "Crear Cuenta"}
                     </button>
-                    <label className="grid place-items-center text-white">
-                        O
-                    </label>
-                    <div className="grid place-items-center">
+
+                    <label className="text-white text-center">O</label>
+                    <div className="text-center">
                         <label className="text-white">
                             Ya tienes una cuenta?{" "}
-                            <Link
-                                to={"/login"}
-                                className="text-blue-400 hover:text-blue-700"
-                            >
-                                {" "}
-                                Inicia Sesion
+                            <Link to={"/login"} className="text-blue-400 hover:text-blue-700">
+                                Inicia Sesión
                             </Link>
                         </label>
                     </div>

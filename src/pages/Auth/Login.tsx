@@ -19,7 +19,13 @@ export default function Login() {
                 name: data.user.name,
                 lastname: data.user.lastname,
                 role: data.user.role_id,
+                group_id: data.user.group_id, // si existe
+
             });
+            // Aquí guardas el nombre del grupo en localStorage
+            if (data.user.group_name) {
+                localStorage.setItem("group_name", data.user.group_name);
+        }
             navigate("/home");
         }
     }, [data, navigate]);

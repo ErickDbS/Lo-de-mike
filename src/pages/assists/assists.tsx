@@ -7,6 +7,7 @@ export default function Assists() {
   const authContext = useContext(AuthContext) as any;
   const userRole: any = authContext.storage.role;
   const [open, setOpen] = useState(false);
+  console.log(userRole);
 
   if (userRole === 1) {
     return (
