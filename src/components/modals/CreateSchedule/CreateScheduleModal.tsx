@@ -1,12 +1,19 @@
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { Link } from "react-router-dom";
-import { CalendarPlus, ListPlus, Delete } from "lucide-react";
+import {
+    CalendarPlus,
+    ListPlus,
+    Delete,
+    CircleCheck,
+    CircleX,
+} from "lucide-react";
 import { useForm } from "react-hook-form";
 import GenerateNewScheduleRow from "./GenerateNewScheduleRow";
 import { useCallback, useEffect, useState } from "react";
 import SelectPicker from "rsuite/SelectPicker";
 import "rsuite/SelectPicker/styles/index.css";
+import { useFetch } from "../../../hooks/useFetch";
 
 const MySwal = withReactContent(Swal);
 
@@ -50,9 +57,11 @@ const FormComponent = () => {
     const [classrooms, setClassrooms] = useState<any>();
     const [isComplete, setIsComplete] = useState<boolean>(false);
     const [rowsData, setRowsData] = useState<RowData[]>([]);
+    const { data, error: fetchError, doFetch, loading } = useFetch(null, null);
 
     // Carga inicial de grupos y salones
     useEffect(() => {
+        GenerateNewRow();
         async function loadMeta() {
             try {
                 const [gRes, sRes] = await Promise.all([
@@ -94,22 +103,45 @@ const FormComponent = () => {
         []
     );
 
-    console.log("Rows data", rowsData);
-
-    //Verificar salon y grupo
+    //Verificar salon, grupo y las rows
     useEffect(() => {
         const allRowsComplete =
             !!groupId &&
             !!classroomId &&
+            rows.length !== 0 &&
             rowsData.length === rows.length &&
             rowsData.every((r) => r.isComplete);
 
         setIsComplete(allRowsComplete);
     }, [groupId, classroomId, rowsData]);
 
-    const onSubmit = (data: object) => {
-        console.log(data);
+    const onSubmit = () => {
+        const validPayloads = rowsData
+            .map((r) => r.data)
+            .filter((d): d is object => d !== undefined);
+
+        doFetch("https://schedulechecker.up.railway.app/api/class", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(validPayloads),
+        });
     };
+
+    useEffect(() => {
+        if (data) {
+            Swal.fire("Horario creado exitosamente", "success");
+        }
+    }, [data]);
+
+    useEffect(() => {
+        if (fetchError) {
+            Swal.fire({
+                icon: "error",
+                title: "Error al crear el horario.",
+                text: fetchError.message,
+            });
+        }
+    }, [fetchError]);
 
     const GenerateNewRow = () => {
         const newId = rows.length;
@@ -132,7 +164,16 @@ const FormComponent = () => {
                 onSubmit={handleSubmit(onSubmit)}
                 className="flex flex-col gap-4"
             >
-                <div className="flex justify-center gap-4">
+                <div className="flex justify-center gap-4 items-center">
+                    {!!groupId && !!classroomId ? (
+                        <div title="Campos grupo y salón completos.">
+                            <CircleCheck className="text-green-500 hover:scale-110" />
+                        </div>
+                    ) : (
+                        <div title="Grupo y salón es requerido.">
+                            <CircleX className="text-red-500 hover:scale-110" />
+                        </div>
+                    )}
                     <SelectPicker
                         data={grupos}
                         placeholder="Grupo"
@@ -146,33 +187,19 @@ const FormComponent = () => {
                         onChange={(value) => setClassroomId(value)}
                     />
                 </div>
-                {!isComplete && (
-                    <p className="text-red-500 text-sm">
-                        ❌ Grupo y salón es requerido.
-                    </p>
-                )}
 
                 <div className="w-full flex flex-row ">
-                    <div className="grid grid-cols-2 gap-2 w-3/10 justify-center text-sm">
+                    <div className="grid grid-cols-2 gap-2 w-3/10 justify-center text-sm font-bold ml-7">
                         <p>Hora de inicio</p>
                         <p>Hora de fin</p>
                     </div>
-                    <div className="mr-7 grid grid-cols-4 gap-2 w-full ml-2 justify-center text-sm">
+                    <div className="mr-7 grid grid-cols-4 gap-2 w-full ml-2 justify-center text-sm font-bold">
                         <p>Profesor</p>
                         <p>Materia</p>
                         <p>Tema</p>
                         <p>Unidad</p>
                     </div>
                 </div>
-                {/* <div className="mr-7">
-                    <GenerateNewScheduleRow
-                        key={0}
-                        id={0}
-                        groupId={groupId}
-                        classroomId={classroomId}
-                        onChange={handleRowChange}
-                    />
-                </div> */}
 
                 {rows.map((row) => (
                     <div key={row.id} className="flex flex-row">
@@ -209,7 +236,8 @@ const FormComponent = () => {
                 <button
                     type="submit"
                     disabled={!isComplete}
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded cursor-pointer disabled:bg-gray-300 disabled:cursor-not-allowed"
+                    title={!isComplete ? "Faltan datos por llenar." : ""}
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded cursor-pointer disabled:bg-gray-300 disabled:cursor-not-allowed mt-20"
                 >
                     Guardar
                 </button>
@@ -234,7 +262,7 @@ const showScheduleModal = () => {
 function CreateScheduleModal() {
     return (
         <Link
-            className="group relative inline-block text-white h-6 flex flex-row"
+            className="group relative text-white h-6 flex flex-row"
             to="#"
             onClick={(e) => {
                 e.preventDefault();

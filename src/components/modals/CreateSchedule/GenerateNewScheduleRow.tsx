@@ -3,6 +3,7 @@ import "rsuite/TimePicker/styles/index.css";
 import { useEffect, useState } from "react";
 import SelectPicker from "rsuite/SelectPicker";
 import "rsuite/SelectPicker/styles/index.css";
+import { CircleCheck, CircleX } from "lucide-react";
 
 interface Props {
     id: number;
@@ -48,6 +49,7 @@ export default function GenerateNewScheduleRow({
     const [unit, setUnit] = useState<any>();
     const [isComplete, setIsComplete] = useState<boolean>(false);
     const [json, setJson] = useState<object>();
+    const [allFilledRow, setAllFilledRow] = useState<boolean>(false);
 
     useEffect(() => {
         const allFilled =
@@ -59,6 +61,15 @@ export default function GenerateNewScheduleRow({
             !!subject &&
             !!topic &&
             !!unit;
+
+        setAllFilledRow(
+            !!startTime &&
+                !!endTime &&
+                !!master &&
+                !!subject &&
+                !!topic &&
+                !!unit
+        );
 
         const payload = allFilled
             ? {
@@ -92,7 +103,16 @@ export default function GenerateNewScheduleRow({
     // console.log("Datos completos?", isComplete, "Data", json);
 
     return (
-        <div className="flex flex-col w-full">
+        <div className="flex flex-row w-full items-center">
+            {allFilledRow ? (
+                <div title="Campos completos" className="w-7 h-9 mr-1">
+                    <CircleCheck className="text-green-500 hover:scale-110" />
+                </div>
+            ) : (
+                <div title="Faltan campos por llenar" className="w-7 h-9 mr-1">
+                    <CircleX className="text-red-500 hover:scale-110" />
+                </div>
+            )}
             <form className="flex flex-row justify-between w-full mb-3">
                 <div className="grid grid-cols-2 gap-2 w-3/10">
                     <TimePicker
@@ -141,13 +161,6 @@ export default function GenerateNewScheduleRow({
                     />
                 </div>
             </form>
-            {isComplete ? (
-                <p className="text-green-500 text-sm">✅ Campos completos</p>
-            ) : (
-                <p className="text-red-500 text-sm">
-                    ❌ Faltan campos por llenar
-                </p>
-            )}
         </div>
     );
 }
