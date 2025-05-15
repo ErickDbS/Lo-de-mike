@@ -73,6 +73,8 @@ export default function Navbar() {
             if (result.isConfirmed) {
                 authContext.setStorage(undefined);
                 localStorage.removeItem("UserData");
+                localStorage.removeItem("group_name");
+                localStorage.removeItem("aula_del_grupo");
                 navigate("/");
             }
         });

@@ -14,6 +14,7 @@ export default function Home() {
         materia: string;
         profesor: string;
         tema: string;
+        aula:string;
         start: string;
         end: string;
     };
@@ -23,44 +24,77 @@ export default function Home() {
     const [horarios, setHorarios] = useState<Clase[]>([]);
     const [claseActual, setClaseActual] = useState<Clase | null>(null);
 
+    const group = localStorage.getItem("group_name");
+
+    if (!group) {
+        console.error("No hay grupo en localStorage");
+        return null;
+    }
+
+
 
     useEffect(() => {
         if (!data || !data.classes) return;
-
-        const nuevosHorarios = data.classes.map((clase: any) => ({
+    
+        // Obtener grupo desde localStorage
+        const grupoActual = localStorage.getItem("group_name");
+        if (!grupoActual) return;
+    
+        // Buscar una clase que pertenezca a ese grupo
+        const claseDeGrupo = data.classes.find((clase: any) =>
+            clase.group?.name === grupoActual
+        );
+    
+        // Si se encontró, guarda el aula en localStorage
+        if (claseDeGrupo?.classroom?.name) {
+            localStorage.setItem("aula_del_grupo", claseDeGrupo.classroom.name);
+        }
+    
+        // Continuar con la lógica actual
+        const clasesDelGrupo = data.classes.filter((clase: any) =>
+            clase.group?.name === grupoActual
+        );
+    
+        const nuevosHorarios = clasesDelGrupo.map((clase: any) => ({
             hora: `${clase.start_time.slice(0, 5)} - ${clase.end_time.slice(0, 5)}`,
             materia: clase.subject.name,
             profesor: `${clase.master.acronym} ${clase.master.name} ${clase.master.lastname}`,
             tema: clase.topic.title,
+            aula: clase.classroom.name,
             start: clase.start_time.slice(0, 5),
             end: clase.end_time.slice(0, 5),
         }));
-
+    
         setHorarios(nuevosHorarios);
-
+    
         const verificarClaseActual = () => {
             const ahora = new Date();
             const horaActual = ahora.getHours().toString().padStart(2, "0");
             const minutosActuales = ahora.getMinutes().toString().padStart(2, "0");
             const tiempoActual = `${horaActual}:${minutosActuales}`;
-
-            const claseEnCurso = nuevosHorarios.find((h:any) => {
+    
+            const claseEnCurso = nuevosHorarios.find((h: any) => {
                 return tiempoActual >= h.start && tiempoActual < h.end;
             });
-
+    
             setClaseActual(claseEnCurso || null);
         };
-
+    
         verificarClaseActual();
+    
+        const intervalo = setInterval(verificarClaseActual, 60000);
+        return () => clearInterval(intervalo);
+    }, [data, group]);
 
-        const intervalo = setInterval(verificarClaseActual, 60000); // actualiza cada minuto
-        return () => clearInterval(intervalo); // limpia al desmontar
-    }, [data]);
+    const aula = localStorage.getItem("aula_del_grupo");
+
+    
+    
 
     return (
         <div className="flex flex-col items-center justify-center">
             <div className="w-full max-w-5xl flex items-center justify-center rounded text-white">
-                <Schedule grupo="4-03-IS" aula="Aula 20" horarios={horarios} />
+                <Schedule grupo={group} aula={aula ?? "Sin aula"} horarios={horarios} />
             </div>
 
             <div className="mt-10 bg-[#1e2022] flex flex-col items-center justify-center rounded text-white">
