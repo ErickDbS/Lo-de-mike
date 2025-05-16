@@ -14,6 +14,7 @@ import { useCallback, useEffect, useState } from "react";
 import SelectPicker from "rsuite/SelectPicker";
 import "rsuite/SelectPicker/styles/index.css";
 import { useFetch } from "../../../hooks/useFetch";
+import AlertDialog from "../../Alerts/AlertDialog";
 
 const MySwal = withReactContent(Swal);
 
@@ -52,6 +53,7 @@ const FormComponent = () => {
     const [isComplete, setIsComplete] = useState<boolean>(false);
     const [rowsData, setRowsData] = useState<RowData[]>([]);
     const { data, error: fetchError, doFetch } = useFetch(null, null);
+    const [open, setOpen] = useState(false);
 
     // Carga inicial de grupos y salones
     useEffect(() => {
@@ -147,7 +149,7 @@ const FormComponent = () => {
 
     useEffect(() => {
         if (fetchError) {
-            confirm(`${fetchError.message}: ${fetchError.errors}`);
+            setOpen(true);
         }
     }, [fetchError]);
 
@@ -160,6 +162,8 @@ const FormComponent = () => {
         ]);
     };
 
+    console.log("Rows", rows);
+
     const deleteRow = (rowId: number) => {
         if (!confirm("¿Seguro?")) return;
         setRows((prev) => prev.filter((r) => r.id !== rowId));
@@ -168,6 +172,15 @@ const FormComponent = () => {
 
     return (
         <>
+            <AlertDialog
+                isOpen={open}
+                onClose={() => setOpen(false)}
+                icon="error"
+                title={fetchError?.message}
+                message={fetchError?.errors}
+                textButton="Ok"
+                colorButton="blue"
+            />
             <form
                 onSubmit={handleSubmit(onSubmit)}
                 className="flex flex-col gap-4"
