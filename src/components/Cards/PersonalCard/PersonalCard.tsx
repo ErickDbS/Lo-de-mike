@@ -1,16 +1,31 @@
-import { Check, X, List } from 'lucide-react';
+import { Check, X, Ban } from 'lucide-react';
 import { useEffect } from 'react';
 import { useState } from 'react';
 
 interface PersonalCardProps {
-    nameProfesor: string;
-    nameMateria: string;
-    Tema:string;
-    Hora:string;
+  nameProfesor: string;
+  nameMateria: string;
+  Tema: string;
+  Hora: string;
+  masterId: number;
+  classId: number;
+  onRegistrarAsistencia: (
+    estado: 'A' | 'NA' | 'R',
+    classId: number,
+    masterId: number,
+    fecha: string
+  ) => void;
 }
 
-export default function PersonalCard({ nameMateria, nameProfesor, Hora, Tema }: PersonalCardProps) {
+
+export default function PersonalCard({ nameMateria, nameProfesor, Hora, Tema, masterId, classId, onRegistrarAsistencia }: PersonalCardProps) {
     const [isActive, setIsActive] = useState(false);
+
+    const getCurrentDate = () => {
+        const today = new Date();
+        return today.toISOString().split('T')[0]; // yyyy-mm-dd
+    };
+
 
     useEffect(() => {
         const checkTime = () => {
@@ -38,7 +53,7 @@ export default function PersonalCard({ nameMateria, nameProfesor, Hora, Tema }: 
 
     return (
         <div className="grid place-items-center">
-            <div className="text-white text-4xl border border-solid rounded-xl w-225 grid grid-cols-2 items-center p-5 mb-4 bg-gray-900 hover:bg-gray-800 transition">
+            <div className="text-white text-4xl border border-solid rounded-xl w-250 grid grid-cols-2 items-center p-5 mb-4 bg-gray-900 hover:bg-gray-800 transition">
                 <div className="text-xl space-y-2">
                     <p><strong className="text-blue-800">Materia:</strong> {nameMateria}</p>
                     <p><strong className="text-blue-800">Profesor:</strong> {nameProfesor}</p>
@@ -50,8 +65,9 @@ export default function PersonalCard({ nameMateria, nameProfesor, Hora, Tema }: 
                         type="button"
                         disabled={!isActive}
                         className={`px-4 py-2 rounded-xl text-xl transition flex items-center gap-2 cursor-pointer
-                            ${isActive ? "bg-green-600 hover:bg-green-700 text-white" : "bg-gray-400 cursor-not-allowed text-gray-200"}
+                            ${isActive ? "bg-gray-900 hover:bg-green-700 text-white" : "bg-gray-400 cursor-not-allowed text-gray-200"}
                         `}
+                        onClick={() => onRegistrarAsistencia("A", classId, masterId, getCurrentDate())}
                     >
                         <Check size={20} /> Asistió
 
@@ -60,8 +76,9 @@ export default function PersonalCard({ nameMateria, nameProfesor, Hora, Tema }: 
                         type="button"
                         disabled={!isActive}
                         className={`px-4 py-2 rounded-xl text-xl transition flex items-center gap-2 cursor-pointer
-                            ${isActive ? "bg-red-600 hover:bg-red-700 text-white" : "bg-gray-400 cursor-not-allowed text-gray-200"}
+                            ${isActive ? "bg-gray-900 hover:bg-red-700 text-white" : "bg-gray-400 cursor-not-allowed text-gray-200"}
                         `}
+                        onClick={() => onRegistrarAsistencia("NA", classId, masterId, getCurrentDate())}
                     >
                         <X size={20} /> No asistió
                     </button>
@@ -69,10 +86,11 @@ export default function PersonalCard({ nameMateria, nameProfesor, Hora, Tema }: 
                         type="button"
                         disabled={!isActive}
                         className={`px-4 py-2 rounded-xl text-xl transition flex items-center gap-2 cursor-pointer
-                            ${isActive ? "bg-yellow-600 hover:bg-yellow-700 text-white" : "bg-gray-400 cursor-not-allowed text-gray-200"}
+                            ${isActive ? "bg-gray-900 hover:bg-yellow-600 text-white" : "bg-gray-400 cursor-not-allowed text-gray-200"}
                         `}
+                        onClick={() => onRegistrarAsistencia("R", classId, masterId, getCurrentDate())}
                     >
-                     Llego tarde
+                     <Ban size={20} /> Llego tarde
                     </button>
                 </div>
             </div>
