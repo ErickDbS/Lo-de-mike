@@ -5,6 +5,7 @@ import SelectPicker from "rsuite/SelectPicker";
 import "rsuite/SelectPicker/styles/index.css";
 import { CircleCheck, CircleX } from "lucide-react";
 import Swal from "sweetalert2";
+import AlertDialog from "../../Alerts/AlertDialog";
 
 interface Props {
     id: number;
@@ -79,6 +80,11 @@ export default function GenerateNewScheduleRow({
     const [isComplete, setIsComplete] = useState<boolean>(false);
     const [json, setJson] = useState<object>();
     const [allFilledRow, setAllFilledRow] = useState<boolean>(false);
+    //modal
+    const [open, setOpen] = useState(false);
+    const [modalIcon, setModalIcon] = useState<any>();
+    const [modalTitle, setModalTitle] = useState("");
+    const [modalMessage, setModalMessage] = useState("");
 
     //States data
     const [masters, setMasters] = useState<any>();
@@ -201,12 +207,11 @@ export default function GenerateNewScheduleRow({
                 setUnits(unitsFormat);
             } catch (err) {
                 console.error(err);
-                Swal.fire({
-                    theme: "dark",
-                    icon: "error",
-                    title: "Oops...",
-                    text: "Error al cargar los datos! Intente más tarde.",
-                });
+                setModal(
+                    "error",
+                    "Oops...",
+                    "La materia no cuenta con unidades. Intente con otra materia."
+                );
             }
         }
 
@@ -236,12 +241,11 @@ export default function GenerateNewScheduleRow({
                 setTopics(topicsFormat);
             } catch (err) {
                 console.error(err);
-                Swal.fire({
-                    theme: "dark",
-                    icon: "error",
-                    title: "Oops...",
-                    text: "Error al cargar los datos! Intente más tarde.",
-                });
+                setModal(
+                    "error",
+                    "Oops...",
+                    "La unidad no cuenta con temas. Intente con otra unidad."
+                );
             }
         }
 
@@ -249,8 +253,24 @@ export default function GenerateNewScheduleRow({
         setTopicDisable(value === null);
     };
 
+    const setModal = (icon: string, title: string, message: string) => {
+        setModalIcon(icon);
+        setModalTitle(title);
+        setModalMessage(message);
+        setOpen(true);
+    };
+
     return (
         <div className="flex flex-row w-full items-center">
+            <AlertDialog
+                isOpen={open}
+                onClose={() => setOpen(false)}
+                icon={modalIcon}
+                title={modalTitle}
+                message={modalMessage}
+                textButton="Ok"
+                colorButton="blue"
+            />
             {allFilledRow ? (
                 <div title="Campos completos" className="w-7 h-9 mr-1">
                     <CircleCheck className="text-green-500 hover:scale-110" />

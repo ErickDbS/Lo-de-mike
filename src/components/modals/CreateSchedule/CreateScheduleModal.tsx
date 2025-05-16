@@ -53,7 +53,11 @@ const FormComponent = () => {
     const [isComplete, setIsComplete] = useState<boolean>(false);
     const [rowsData, setRowsData] = useState<RowData[]>([]);
     const { data, error: fetchError, doFetch } = useFetch(null, null);
+    //modal
     const [open, setOpen] = useState(false);
+    const [modalIcon, setModalIcon] = useState<any>();
+    const [modalTitle, setModalTitle] = useState("");
+    const [modalMessage, setModalMessage] = useState("");
 
     // Carga inicial de grupos y salones
     useEffect(() => {
@@ -102,6 +106,37 @@ const FormComponent = () => {
         loadMeta();
     }, []);
 
+    useEffect(() => {
+        if (data) {
+            Swal.fire("Horario creado exitosamente", "success");
+        }
+    }, [data]);
+
+    useEffect(() => {
+        if (fetchError) {
+            setModal("error", fetchError.message, fetchError.errors);
+        }
+    }, [fetchError]);
+
+    //Verificar salon, grupo y las rows
+    useEffect(() => {
+        const allRowsComplete =
+            !!groupId &&
+            !!classroomId &&
+            rows.length !== 0 &&
+            rowsData.length === rows.length &&
+            rowsData.every((r) => r.isComplete);
+
+        setIsComplete(allRowsComplete);
+    }, [groupId, classroomId, rowsData]);
+
+    const setModal = (icon: string, title: string, message: string) => {
+        setModalIcon(icon);
+        setModalTitle(title);
+        setModalMessage(message);
+        setOpen(true);
+    };
+
     const handleRowChange = useCallback(
         (id: number, isComplete: boolean, data?: any) => {
             setRowsData((old) => {
@@ -116,18 +151,6 @@ const FormComponent = () => {
         []
     );
 
-    //Verificar salon, grupo y las rows
-    useEffect(() => {
-        const allRowsComplete =
-            !!groupId &&
-            !!classroomId &&
-            rows.length !== 0 &&
-            rowsData.length === rows.length &&
-            rowsData.every((r) => r.isComplete);
-
-        setIsComplete(allRowsComplete);
-    }, [groupId, classroomId, rowsData]);
-
     const onSubmit = () => {
         const validPayloads = rowsData
             .map((r) => r.data)
@@ -141,20 +164,11 @@ const FormComponent = () => {
         });
     };
 
-    useEffect(() => {
-        if (data) {
-            Swal.fire("Horario creado exitosamente", "success");
-        }
-    }, [data]);
-
-    useEffect(() => {
-        if (fetchError) {
-            setOpen(true);
-        }
-    }, [fetchError]);
-
     const GenerateNewRow = () => {
-        const newId = rows.length;
+        const allIds = rows.map((row) => row.id);
+        const maxId = allIds.length > 0 ? Math.max(...allIds) : -1;
+        const newId = maxId + 1;
+
         setRows((prev) => [...prev, { id: newId }]);
         setRowsData((prev) => [
             ...prev,
@@ -162,22 +176,22 @@ const FormComponent = () => {
         ]);
     };
 
-    console.log("Rows", rows);
-
     const deleteRow = (rowId: number) => {
         if (!confirm("¿Seguro?")) return;
         setRows((prev) => prev.filter((r) => r.id !== rowId));
         setRowsData((prev) => prev.filter((r) => r.id !== rowId));
     };
 
+    console.log("rows", rows);
+
     return (
         <>
             <AlertDialog
                 isOpen={open}
                 onClose={() => setOpen(false)}
-                icon="error"
-                title={fetchError?.message}
-                message={fetchError?.errors}
+                icon={modalIcon}
+                title={modalTitle}
+                message={modalMessage}
                 textButton="Ok"
                 colorButton="blue"
             />
