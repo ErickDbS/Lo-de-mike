@@ -1,22 +1,7 @@
-/* @import "rsuite/dist/rsuite.css"; */
 @import "tailwindcss";
 @import "tailwindcss-animated";
 
-.rs-anim-fade,
-.rs-anim-in {
-    z-index: 9999 !important;
-}
-
-.rs-modal-xs,
-.rs-anim-bounce-in,
-.rs-modal {
-    z-index: 9999 !important;
-}
-
-.rs-modal-wrapper {
-    z-index: 99999 !important;
-}
-
-.rs-modal-dialog {
-    z-index: 99999 !important;
+/* Color del modal */
+.rs-modal-content {
+    background: #181a1b !important;
 }
