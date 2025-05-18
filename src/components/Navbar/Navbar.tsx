@@ -123,7 +123,6 @@ export default function Navbar() {
 
                 {userRole === 4 ? (
                     <>
-                        <button onClick={handleOpen}>hola</button>
                         <Link
                             className="group relative text-white h-6 flex flex-row"
                             to="#"
