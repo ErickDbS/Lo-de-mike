@@ -46,26 +46,27 @@ export default function ScheduleAdmin({
     // const dias = ["L", "M", "M", "J", "V"];
 
     return (
-        <div className="flex justify-center items-center rounded-2xl group hover:scale-102 transition duration-300 ease-in-out h-[18rem] ">
+        <div className="justify-center items-center rounded-2xl group hover:scale-102 transition duration-300 ease-in-out">
             <div className="w-full max-w-5xl  rounded-2xl shadow-lg overflow-hidden">
-                <Link
-                    className="absolute end-6 top-4 hidden group-has-hover:block hover:scale-115 hover:cursor-pointer transition duration-300 ease-in-out text-yellow-500 animate-fade-left animate-ease-linear animate-duration-300 "
-                    to="#"
-                    onClick={handleOpen}
-                    title="Editar horario."
-                >
-                    <Pencil />
-                </Link>
-                {isRendered && (
-                    <EditScheduleModal
-                        isOpen={isOpen}
-                        onClose={() => setIsOpen(false)}
-                        onExited={() => setIsRendered(false)}
-                    />
-                )}
-
-                <div className="bg-blue-800 text-white p-4 text-center text-base font-bold">
-                    Grupo {grupo} {carrera} - {aula}
+                <div className="bg-blue-800 text-white p-4 text-center text-base font-bold flex flex-row justify-between">
+                    <h1 className="w-full">
+                        Grupo {grupo} {carrera} - {aula}
+                    </h1>
+                    <Link
+                        className="absolute end-6 hidden group-has-hover:block hover:scale-115 hover:cursor-pointer transition duration-300 ease-in-out text-yellow-500 animate-fade-left animate-ease-linear animate-duration-300 "
+                        to="#"
+                        onClick={handleOpen}
+                        title="Editar horario"
+                    >
+                        <Pencil />
+                    </Link>
+                    {isRendered && (
+                        <EditScheduleModal
+                            isOpen={isOpen}
+                            onClose={() => setIsOpen(false)}
+                            onExited={() => setIsRendered(false)}
+                        />
+                    )}
                 </div>
 
                 {/* Tabla */}
