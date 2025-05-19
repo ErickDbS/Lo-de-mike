@@ -13,22 +13,20 @@ export default function Assists() {
   const fechaActual = fecha.toLocaleDateString("es-MX")
 
   const registrarAsistencia = async (
-    estado: 'A' | 'NA' | 'R',
-    classId: number,
-    masterId: number,
-    fecha: string
+    status: 'A' | 'NA' | 'R',
+    class_schedule_id: number,
+    master_id: number,
   ) => {
     try {
-      const response = await fetch("https://schedulechecker.up.railway.app/api/attendance", {
+      const response = await fetch("https://schedulechecker.up.railway.app/api/attendances", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          estado,
-          classId,
-          masterId,
-          fecha,
+          class_schedule_id,
+          master_id,
+          status,
         }),
       });
 
