@@ -1,6 +1,9 @@
-import { Pencil } from "lucide-react";
+// import EditScheduleModal from "../modals/EditScheduleModal";
+
 import { Link } from "react-router-dom";
-import EditScheduleModal from "../modals/EditScheduleModal";
+import EditScheduleModal from "../modals/EditSchedule/EditScheduleModal";
+import { useState } from "react";
+import { Pencil } from "lucide-react";
 
 interface Horario {
     hora: string;
@@ -11,15 +14,24 @@ interface Horario {
 
 interface ScheduleProps {
     grupo: string;
+    carrera: string;
     aula: string;
     horarios: Horario[];
 }
 
 export default function ScheduleAdmin({
     grupo,
+    carrera,
     aula,
     horarios,
 }: ScheduleProps) {
+    const [isRendered, setIsRendered] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
+
+    const handleOpen = () => {
+        setIsRendered(true);
+        setIsOpen(true);
+    };
     // const [checked, setChecked] = useState<{ [key: string]: boolean }>({});
 
     // const toggleCheck = (key: string) => {
@@ -32,12 +44,26 @@ export default function ScheduleAdmin({
     // const dias = ["L", "M", "M", "J", "V"];
 
     return (
-        <div className="flex justify-center items-center rounded-2xl group hover:scale-102 transition duration-300 ease-in-out ">
-            <EditScheduleModal />
+        <div className="flex justify-center items-center rounded-2xl group hover:scale-102 transition duration-300 ease-in-out h-[18rem] ">
             <div className="w-full max-w-5xl  rounded-2xl shadow-lg overflow-hidden">
-                {/* Encabezado */}
+                <Link
+                    className="absolute end-6 top-4 hidden group-has-hover:block hover:scale-115 hover:cursor-pointer transition duration-300 ease-in-out text-yellow-500 animate-fade-left animate-ease-linear animate-duration-300 "
+                    to="#"
+                    onClick={handleOpen}
+                    title="Editar horario."
+                >
+                    <Pencil />
+                </Link>
+                {isRendered && (
+                    <EditScheduleModal
+                        isOpen={isOpen}
+                        onClose={() => setIsOpen(false)}
+                        onExited={() => setIsRendered(false)}
+                    />
+                )}
+
                 <div className="bg-blue-800 text-white p-4 text-center text-base font-bold">
-                    Grupo {grupo} - {aula}
+                    Grupo {grupo} {carrera} - {aula}
                 </div>
 
                 {/* Tabla */}
