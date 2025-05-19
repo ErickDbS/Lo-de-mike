@@ -28,6 +28,8 @@ export default function ScheduleAdmin({
     const [isRendered, setIsRendered] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
 
+    console.log("horarios", horarios);
+
     const handleOpen = () => {
         setIsRendered(true);
         setIsOpen(true);
@@ -88,13 +90,13 @@ export default function ScheduleAdmin({
                                 className="odd:bg-gray-800 even:bg-gray-700 transition duration-200"
                             >
                                 <td className="p-3 text-xs text-center">
-                                    {horario.hora}
+                                    {`${horario.start_time} - ${horario.end_time}`}
                                 </td>
                                 <td className="p-3 text-xs text-center">
-                                    {horario.materia}
+                                    {horario.unit.title}
                                 </td>
                                 <td className="p-3 text-xs text-center">
-                                    {horario.profesor}
+                                    {`${horario.master.acronym}${horario.master.lastname} ${horario.master.name}`}
                                 </td>
                                 {/* {dias.map((_, dayIndex) => {
                                     const key = `${rowIndex}-${dayIndex}`;
@@ -142,7 +144,7 @@ export default function ScheduleAdmin({
                                     );
                                 })} */}
                                 <td className="p-3 text-xs text-center">
-                                    {horario.tema}
+                                    {horario.subject.name}
                                 </td>
                             </tr>
                         ))}

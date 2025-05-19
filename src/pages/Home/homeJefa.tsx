@@ -95,26 +95,13 @@ export default function HomeJefa() {
             ) : (
                 <div className="w-full h-[calc(100svh_-_12.2rem)] bg-[#1e2022] rounded-lg px-4 pt-4 pb-0 grid grid-cols-1 md:grid-cols-2 gap-8 overflow-y-auto">
                     {schedules.map((schedule, index) => {
-                        console.log("schedule", schedule);
-                        // const customSchedules = schedules.map((schedule) => {
-                        //     return {
-                        //         hora: `${schedule.start_time} - ${schedule.end_time}`,
-                        //         materia: schedule.subject.name,
-                        //         profesor: schedule.master.name,
-                        //         tema: schedule.topic.title,
-                        //     };
-                        // });
-
-                        // console.log("custom schedules", customSchedules);
-                        console.log(schedule.subject.name);
-
                         return (
                             <ScheduleAdmin
                                 key={index}
                                 grupo={schedule[0].group.name}
                                 carrera="Carrera"
                                 aula={schedule[0].classroom.name}
-                                horarios={[]}
+                                horarios={schedule}
                             />
                         );
                     })}
