@@ -69,7 +69,9 @@ export default function CreateScheduleModal({
         async function loadMeta() {
             try {
                 const [gRes, sRes] = await Promise.all([
-                    fetch("https://schedulechecker.up.railway.app/api/groups"),
+                    fetch(
+                        "https://schedulechecker.up.railway.app/api/groups/filter"
+                    ),
                     fetch(
                         "https://schedulechecker.up.railway.app/api/classrooms"
                     ),
@@ -79,12 +81,10 @@ export default function CreateScheduleModal({
                 }
                 // GRUPOS
                 const groupsJson = await gRes.json();
-                const groupsFormat = groupsJson.groups.map(
-                    (data: GrupoRaw) => ({
-                        label: data.name,
-                        value: data.group_id,
-                    })
-                );
+                const groupsFormat = groupsJson.data.map((data: GrupoRaw) => ({
+                    label: data.name,
+                    value: data.group_id,
+                }));
                 setGroups(groupsFormat);
 
                 // SALONES

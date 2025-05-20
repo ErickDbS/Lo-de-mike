@@ -1,15 +1,25 @@
-// import EditScheduleModal from "../modals/EditScheduleModal";
-
 import { Link } from "react-router-dom";
 import EditScheduleModal from "../modals/EditSchedule/EditScheduleModal";
 import { useState } from "react";
-import { Pencil } from "lucide-react";
+import { Pencil, Trash } from "lucide-react";
+import Swal from "sweetalert2";
 
 interface Horario {
-    hora: string;
-    materia: string;
-    profesor: string;
-    tema: string;
+    group: group;
+    career: career;
+    classroom: classroom;
+}
+
+interface group {
+    group_id: string;
+}
+
+interface career {
+    career_id: string;
+}
+
+interface classroom {
+    classroom_id: string;
 }
 
 interface ScheduleProps {
@@ -17,6 +27,7 @@ interface ScheduleProps {
     carrera: string;
     aula: string;
     horarios: Horario[];
+    onUpdated: () => void;
 }
 
 export default function ScheduleAdmin({
@@ -24,31 +35,83 @@ export default function ScheduleAdmin({
     carrera,
     aula,
     horarios,
+    onUpdated,
 }: ScheduleProps) {
     const [isRendered, setIsRendered] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
 
-    console.log("horarios", horarios);
+    const formattingTime = (hora: string): string => {
+        const partes = hora.split(":");
+        if (partes.length < 2) {
+            return hora;
+        }
+        return `${partes[0]}:${partes[1]}`;
+    };
 
     const handleOpen = () => {
         setIsRendered(true);
         setIsOpen(true);
     };
-    // const [checked, setChecked] = useState<{ [key: string]: boolean }>({});
 
-    // const toggleCheck = (key: string) => {
-    //     setChecked((prev) => ({
-    //         ...prev,
-    //         [key]: !prev[key],
-    //     }));
-    // };
+    const deleteSchedule = () => {
+        Swal.fire({
+            title: "¿Está seguro de eliminar el horario?",
+            text: "Si elimina este horario toda la información se perderá.",
+            theme: "dark",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si, eliminar",
+            cancelButtonText: "Cancelar",
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const res = await fetch(
+                        `https://schedulechecker.up.railway.app/api/class/${horarios[0].group.group_id}`,
+                        {
+                            method: "DELETE",
+                        }
+                    );
 
-    // const dias = ["L", "M", "M", "J", "V"];
+                    const json = await res.json();
+                    if (!res.ok) {
+                        throw json;
+                    }
+                    onUpdated();
+
+                    Swal.fire({
+                        title: "Horario eliminado exitosamente",
+                        theme: "dark",
+                        icon: "success",
+                    });
+                } catch (err: any) {
+                    Swal.fire({
+                        theme: "dark",
+                        icon: "error",
+                        title: "No fue posible eliminar el horario.",
+                        text: "Por favor inténtelo de nuevo.",
+                    });
+                }
+            } else {
+                return;
+            }
+        });
+    };
 
     return (
-        <div className="justify-center items-center rounded-2xl group hover:scale-102 transition duration-300 ease-in-out">
-            <div className="w-full max-w-5xl  rounded-2xl shadow-lg overflow-hidden">
+        <div className="justify-center items-center rounded-2xl group hover:scale-102 transition duration-300 ease-in-out ">
+            <div className="w-full max-w-5xl  rounded-2xl shadow-lg overflow-hidden min-h-[25rem]">
                 <div className="bg-blue-800 text-white p-4 text-center text-base font-bold flex flex-row justify-between">
+                    <Link
+                        className="absolute start-6 hidden group-has-hover:block hover:scale-115 hover:cursor-pointer transition duration-300 ease-in-out text-red-500 animate-fade-right animate-ease-linear animate-duration-300 "
+                        to="#"
+                        onClick={deleteSchedule}
+                        title="Eliminar horario"
+                    >
+                        <Trash />
+                    </Link>
+
                     <h1 className="w-full">
                         Grupo {grupo} {carrera} - {aula}
                     </h1>
@@ -65,90 +128,61 @@ export default function ScheduleAdmin({
                             isOpen={isOpen}
                             onClose={() => setIsOpen(false)}
                             onExited={() => setIsRendered(false)}
+                            career_Id={horarios[0].career.career_id}
+                            group_Id={horarios[0].group.group_id}
+                            classroom_id={horarios[0].classroom.classroom_id}
                         />
                     )}
                 </div>
 
                 {/* Tabla */}
-                <table className="w-full text-white">
+                <table className="w-full text-white min-h-[25rem]">
                     <thead>
-                        <tr className="bg-gray-700">
-                            <th className="p-3 text-sm">Hora</th>
+                        <tr className="bg-gray-700 h-10">
+                            <th className="p-3 text-sm w-25">Hora</th>
                             <th className="p-3 text-sm">Materia</th>
                             <th className="p-3 text-sm">Profesor</th>
-                            {/* <th className="p-3 text-blue-500">L</th>
-                            <th className="p-3 text-yellow-500">M</th>
-                            <th className="p-3 text-orange-500">M</th>
-                            <th className="p-3 text-green-500">J</th>
-                            <th className="p-3 text-red-500">V</th> */}
                             <th className="p-3 text-sm">Tema</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {horarios.map((horario, rowIndex) => (
-                            <tr
-                                key={rowIndex}
-                                className="odd:bg-gray-800 even:bg-gray-700 transition duration-200"
-                            >
-                                <td className="p-3 text-xs text-center">
-                                    {`${horario.start_time} - ${horario.end_time}`}
-                                </td>
-                                <td className="p-3 text-xs text-center">
-                                    {horario.unit.title}
-                                </td>
-                                <td className="p-3 text-xs text-center">
-                                    {`${horario.master.acronym}${horario.master.lastname} ${horario.master.name}`}
-                                </td>
-                                {/* {dias.map((_, dayIndex) => {
-                                    const key = `${rowIndex}-${dayIndex}`;
-                                    return (
-                                        <td
-                                            key={key}
-                                            className="p-3 text-center"
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                className="hidden"
-                                                id={key}
-                                                checked={checked[key] || false}
-                                                onChange={() =>
-                                                    toggleCheck(key)
-                                                }
-                                            />
-                                            <label
-                                                htmlFor={key}
-                                                className="w-8 h-8 inline-flex items-center justify-center bg-gray-700 rounded-lg cursor-pointer border border-gray-500 hover:bg-gray-600 transition relative"
-                                            >
-                                                <span
-                                                    className={`absolute w-5 h-5 text-green-400 transform scale-0 transition-transform duration-300 ease-out ${
-                                                        checked[key]
-                                                            ? "scale-100 animate-bounce-up"
-                                                            : ""
-                                                    }`}
-                                                >
-                                                    <svg
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        strokeWidth="3"
-                                                        viewBox="0 0 24 24"
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                    >
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            d="M5 13l4 4L19 7"
-                                                        ></path>
-                                                    </svg>
-                                                </span>
-                                            </label>
-                                        </td>
-                                    );
-                                })} */}
-                                <td className="p-3 text-xs text-center">
-                                    {horario.subject.name}
-                                </td>
-                            </tr>
-                        ))}
+                        <>
+                            {horarios.map((horario: any, rowIndex) => (
+                                <tr
+                                    key={rowIndex}
+                                    className="odd:bg-gray-800 even:bg-gray-700 transition duration-200"
+                                >
+                                    <td className="p-3 text-xs text-center">
+                                        {`${formattingTime(
+                                            horario.start_time
+                                        )} - ${formattingTime(
+                                            horario.end_time
+                                        )}`}
+                                    </td>
+                                    <td className="p-3 text-xs text-center">
+                                        {horario.unit.title}
+                                    </td>
+                                    <td className="p-3 text-xs text-center">
+                                        {`${horario.master.acronym} ${horario.master.lastname} ${horario.master.name}`}
+                                    </td>
+                                    <td className="p-3 text-xs text-center">
+                                        {horario.subject.name}
+                                    </td>
+                                </tr>
+                            ))}
+
+                            {[...Array(7 - horarios.length)].map((_, i) => (
+                                <tr
+                                    key={i}
+                                    className="odd:bg-gray-800 even:bg-gray-700 transition duration-200"
+                                >
+                                    <td className="p-3 text-xs text-center"></td>
+                                    <td className="p-3 text-xs text-center"></td>
+                                    <td className="p-3 text-xs text-center"></td>
+                                    <td className="p-3 text-xs text-center"></td>
+                                </tr>
+                            ))}
+                        </>
                     </tbody>
                 </table>
             </div>

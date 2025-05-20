@@ -12,6 +12,9 @@ interface Props {
     isOpen: boolean;
     onClose: any;
     onExited: any;
+    career_Id: string;
+    group_Id: string;
+    classroom_id: string;
 }
 
 interface Row {
@@ -41,12 +44,15 @@ interface RowData {
 }
 
 export default function EditScheduleModal({
+    career_Id,
+    group_Id,
+    classroom_id,
     isOpen,
     onClose,
     onExited,
 }: Props) {
-    const [groupId, setGroupId] = useState<any>();
-    const [classroomId, setClassroomId] = useState<any>();
+    const [groupId, setGroupId] = useState<any>(group_Id);
+    const [classroomId, setClassroomId] = useState<any>(classroom_id);
     const [groups, setGroups] = useState<any>();
     const [classrooms, setClassrooms] = useState<any>();
     const [isComplete, setIsComplete] = useState<boolean>(false);
@@ -68,15 +74,19 @@ export default function EditScheduleModal({
     useEffect(() => {
         async function loadMeta() {
             try {
-                const [gRes, sRes] = await Promise.all([
+                const [gRes, sRes, dRes] = await Promise.all([
                     fetch("https://schedulechecker.up.railway.app/api/groups"),
                     fetch(
                         "https://schedulechecker.up.railway.app/api/classrooms"
                     ),
+                    fetch(
+                        `https://schedulechecker.up.railway.app/api/class/career/${career_Id}/${group_Id}`
+                    ),
                 ]);
-                if (!gRes.ok || !sRes.ok) {
+                if (!gRes.ok || !sRes.ok || !dRes.ok) {
                     throw new Error("Error al cargar datos");
                 }
+
                 // GRUPOS
                 const groupsJson = await gRes.json();
                 const groupsFormat = groupsJson.groups.map(
@@ -85,7 +95,15 @@ export default function EditScheduleModal({
                         value: data.group_id,
                     })
                 );
+                console.log(
+                    "Carrera, grupo y aula: ",
+                    career_Id,
+                    group_Id,
+                    classroom_id
+                );
                 setGroups(groupsFormat);
+                // setGroupId(group_Id);
+                // console.log(groupId);
 
                 // SALONES
                 const classroomsJson = await sRes.json();
@@ -96,6 +114,10 @@ export default function EditScheduleModal({
                     })
                 );
                 setClassrooms(classroomsFormat);
+
+                // Datos del horario
+                const SchedulesData = await dRes.json();
+                console.log("Pongase al tiro compadre", SchedulesData.classes);
             } catch (err) {
                 console.error(err);
                 Swal.fire({
@@ -235,6 +257,8 @@ export default function EditScheduleModal({
         }
     };
 
+    console.log("Ayuda", groupId);
+
     return (
         <Modal
             backdrop="static"
@@ -274,12 +298,14 @@ export default function EditScheduleModal({
                             placeholder="Grupo"
                             className="w-[224]"
                             onChange={(value) => setGroupId(value)}
+                            value={groupId}
                         />
                         <SelectPicker
                             data={classrooms}
                             placeholder="Salón"
                             className="w-[224]"
                             onChange={(value) => setClassroomId(value)}
+                            value={classroomId}
                         />
                     </div>
 
