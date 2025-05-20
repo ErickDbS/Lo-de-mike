@@ -3,10 +3,10 @@ import "rsuite/Modal/styles/index.css";
 import "rsuite/Animation/styles/index.css";
 import Swal from "sweetalert2";
 import { ListPlus, Delete, CircleCheck, CircleX, X } from "lucide-react";
-import GenerateNewScheduleRow from "../CreateSchedule/GenerateNewScheduleRow";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import SelectPicker from "rsuite/SelectPicker";
 import "rsuite/SelectPicker/styles/index.css";
+import GenerateNewScheduleRowWithData from "./GenerateNewScheduleRowWithData";
 
 interface Props {
     isOpen: boolean;
@@ -57,18 +57,10 @@ export default function EditScheduleModal({
     const [classrooms, setClassrooms] = useState<any>();
     const [isComplete, setIsComplete] = useState<boolean>(false);
     const [withData, setWithData] = useState<boolean>(false);
-
-    //Se crea la fila inicial evitando el React StrictMode
-    const initialRow: Row = { id: 0 };
-    const initialRowData: RowData = {
-        id: 0,
-        isComplete: false,
-        data: undefined,
-        withData: false,
-    };
-
-    const [rows, setRows] = useState<Row[]>([initialRow]);
-    const [rowsData, setRowsData] = useState<RowData[]>([initialRowData]);
+    const [scheduleData, setScheduleData] = useState<any>();
+    const [rows, setRows] = useState<Row[]>([]);
+    const [rowsData, setRowsData] = useState<RowData[]>([]);
+    const hasGeneratedRows = useRef(false);
 
     // Carga inicial de grupos y salones
     useEffect(() => {
@@ -95,15 +87,7 @@ export default function EditScheduleModal({
                         value: data.group_id,
                     })
                 );
-                console.log(
-                    "Carrera, grupo y aula: ",
-                    career_Id,
-                    group_Id,
-                    classroom_id
-                );
                 setGroups(groupsFormat);
-                // setGroupId(group_Id);
-                // console.log(groupId);
 
                 // SALONES
                 const classroomsJson = await sRes.json();
@@ -117,7 +101,7 @@ export default function EditScheduleModal({
 
                 // Datos del horario
                 const SchedulesData = await dRes.json();
-                console.log("Pongase al tiro compadre", SchedulesData.classes);
+                setScheduleData(SchedulesData.classes);
             } catch (err) {
                 console.error(err);
                 Swal.fire({
@@ -131,6 +115,19 @@ export default function EditScheduleModal({
 
         loadMeta();
     }, []);
+
+    //Cargamos rows iniciales
+
+    useEffect(() => {
+        if (
+            scheduleData &&
+            scheduleData.length > 0 &&
+            !hasGeneratedRows.current
+        ) {
+            GenerateInitialRows();
+            hasGeneratedRows.current = true;
+        }
+    }, [scheduleData]);
 
     //Verificar salon, grupo y las rows
     useEffect(() => {
@@ -200,6 +197,17 @@ export default function EditScheduleModal({
         }
     };
 
+    const GenerateInitialRows = () => {
+        console.log("Schedule data", scheduleData);
+        for (let i = 0; i < scheduleData.length; i++) {
+            setRows((prev) => [...prev, { id: i }]);
+            setRowsData((prev) => [
+                ...prev,
+                { id: i, isComplete: false, data: undefined },
+            ]);
+        }
+    };
+
     const GenerateNewRow = () => {
         const allIds = rows.map((row) => row.id);
         const maxId = allIds.length > 0 ? Math.max(...allIds) : -1;
@@ -256,8 +264,6 @@ export default function EditScheduleModal({
             onClose();
         }
     };
-
-    console.log("Ayuda", groupId);
 
     return (
         <Modal
@@ -322,24 +328,28 @@ export default function EditScheduleModal({
                         </div>
                     </div>
 
-                    {rows.map((row) => (
-                        <div key={row.id} className="flex flex-row">
-                            <GenerateNewScheduleRow
-                                key={row.id}
-                                id={row.id}
-                                groupId={groupId}
-                                classroomId={classroomId}
-                                onChange={handleRowChange}
-                            />
-                            <button
-                                onClick={() => deleteRow(row.id)}
-                                title="Eliminar fila"
-                                className="hover:text-red-500 w-7 cursor-pointer transition-colors h-9 hover:scale-105"
-                            >
-                                <Delete className="ml-1" />
-                            </button>
-                        </div>
-                    ))}
+                    {rows.map((row) => {
+                        // console.log(scheduleData[row.id]);
+                        return (
+                            <div key={row.id} className="flex flex-row">
+                                <GenerateNewScheduleRowWithData
+                                    key={row.id}
+                                    id={row.id}
+                                    groupId={groupId}
+                                    classroomId={classroomId}
+                                    onChange={handleRowChange}
+                                    initData={scheduleData[row.id]}
+                                />
+                                <button
+                                    onClick={() => deleteRow(row.id)}
+                                    title="Eliminar fila"
+                                    className="hover:text-red-500 w-7 cursor-pointer transition-colors h-9 hover:scale-105"
+                                >
+                                    <Delete className="ml-1" />
+                                </button>
+                            </div>
+                        );
+                    })}
 
                     <a
                         className="group cursor-pointer flex items-center justify-center flex-nowrap"
