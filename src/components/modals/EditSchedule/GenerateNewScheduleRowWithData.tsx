@@ -5,6 +5,7 @@ import SelectPicker from "rsuite/SelectPicker";
 import "rsuite/SelectPicker/styles/index.css";
 import { CircleCheck, CircleX } from "lucide-react";
 import Swal from "sweetalert2";
+import { data } from "react-router-dom";
 
 interface Props {
     id: number;
@@ -70,12 +71,12 @@ export default function GenerateNewScheduleRowWithData({
     initData,
 }: Props) {
     //datos
-    const [startTime, setStartTime] = useState<any>(initData.start_time);
-    const [endTime, setEndTime] = useState<any>(initData.end_time);
-    const [master, setMaster] = useState<any>(initData.master.master_id);
-    const [subject, setSubject] = useState<any>(initData.subject.subject_id);
-    const [topic, setTopic] = useState<any>(initData.topic.topic_id);
-    const [unit, setUnit] = useState<any>(initData.unit.unit_id);
+    const [startTime, setStartTime] = useState<any>();
+    const [endTime, setEndTime] = useState<any>();
+    const [master, setMaster] = useState<any>();
+    const [subject, setSubject] = useState<any>();
+    const [topic, setTopic] = useState<any>();
+    const [unit, setUnit] = useState<any>();
     const [isUnitDisable, setUnitDisable] = useState<any>(true);
     const [isTopicDisable, setTopicDisable] = useState<any>(true);
     const [isComplete, setIsComplete] = useState<boolean>(false);
@@ -89,15 +90,20 @@ export default function GenerateNewScheduleRowWithData({
     const [topics, setTopics] = useState<any>();
     const [units, setUnits] = useState<any>();
 
-    console.log("init data", initData);
-    console.log("materia", subject);
-    console.log("unidad", unit);
-    console.log("tema", topic);
-
     useEffect(() => {
-        if (initData) {
-            onChangeSubject(initData.subject.subject_id);
-            onChangeUnits(initData.unit.unit_id);
+        const subjId = initData?.subject?.subject_id;
+        const unitId = initData?.unit?.unit_id;
+        const masterId = initData?.master?.master_id;
+        const topicId = initData?.topic?.topic_id;
+        const { start_time, end_time } = initData || {};
+
+        if (subjId && unitId && masterId && topicId && start_time && end_time) {
+            onChangeSubject(subjId);
+            onChangeUnits(unitId);
+            setStartTime(parseTimeStringToDate(start_time));
+            setEndTime(parseTimeStringToDate(end_time));
+            setMaster(masterId);
+            setTopic(topicId);
         }
     }, [initData]);
 
@@ -178,8 +184,8 @@ export default function GenerateNewScheduleRowWithData({
                   master_id: master,
                   topic_id: topic,
                   unit_id: unit,
-                  start_time: startTime,
-                  end_time: endTime,
+                  start_time: formatTime(startTime),
+                  end_time: formatTime(endTime),
               }
             : undefined;
 
@@ -292,7 +298,6 @@ export default function GenerateNewScheduleRowWithData({
                         showMeridiem
                         container={document.body}
                         onChange={(value) => setStartTime(formatTime(value))}
-                        value={parseTimeStringToDate(startTime)}
                     />
                     <TimePicker
                         className=""
@@ -300,7 +305,6 @@ export default function GenerateNewScheduleRowWithData({
                         showMeridiem
                         container={document.body}
                         onChange={(value) => setEndTime(formatTime(value))}
-                        value={parseTimeStringToDate(endTime)}
                     />
                 </div>
                 <div className="grid grid-cols-4 gap-2 w-full ml-2">

@@ -61,6 +61,7 @@ export default function EditScheduleModal({
     const [rows, setRows] = useState<Row[]>([]);
     const [rowsData, setRowsData] = useState<RowData[]>([]);
     const hasGeneratedRows = useRef(false);
+    const [loading, setLoading] = useState(true);
 
     // Carga inicial de grupos y salones
     useEffect(() => {
@@ -116,6 +117,25 @@ export default function EditScheduleModal({
         loadMeta();
     }, []);
 
+    useEffect(() => {
+        if (loading) {
+            Swal.fire({
+                toast: true,
+                position: "bottom-end",
+                title: "Cargando...",
+                showConfirmButton: false,
+                color: "white",
+                background:
+                    "#193CB8 linear-gradient(90deg, rgba(25, 60, 184, 1) 0%, rgba(30, 32, 34, 1) 100%",
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+            });
+        } else {
+            Swal.close();
+        }
+    }, [loading]);
+
     //Cargamos rows iniciales
 
     useEffect(() => {
@@ -168,9 +188,9 @@ export default function EditScheduleModal({
         try {
             const payload = validPayloads;
             const res = await fetch(
-                "https://schedulechecker.up.railway.app/api/class",
+                `https://schedulechecker.up.railway.app/api/class/${group_Id}`,
                 {
-                    method: "POST",
+                    method: "PUT",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload),
                 }
@@ -198,7 +218,6 @@ export default function EditScheduleModal({
     };
 
     const GenerateInitialRows = () => {
-        console.log("Schedule data", scheduleData);
         for (let i = 0; i < scheduleData.length; i++) {
             setRows((prev) => [...prev, { id: i }]);
             setRowsData((prev) => [
@@ -206,6 +225,7 @@ export default function EditScheduleModal({
                 { id: i, isComplete: false, data: undefined },
             ]);
         }
+        setLoading(false);
     };
 
     const GenerateNewRow = () => {
@@ -235,6 +255,8 @@ export default function EditScheduleModal({
             if (result.isConfirmed) {
                 setRows((prev) => prev.filter((r) => r.id !== rowId));
                 setRowsData((prev) => prev.filter((r) => r.id !== rowId));
+
+                //NO Solo eliminar la row si no tambien la data de dicha row
             } else {
                 return;
             }
@@ -265,6 +287,8 @@ export default function EditScheduleModal({
         }
     };
 
+    if (loading) return null;
+
     return (
         <Modal
             backdrop="static"
@@ -272,7 +296,7 @@ export default function EditScheduleModal({
             onExited={onExited}
             onClose={onClose}
             size="90%"
-            className="animate-fade-down animate-ease-in-out text-white "
+            className="animate-fade-down animate-ease-in-out text-white"
         >
             <Modal.Header onClose={onClose} closeButton={false}>
                 <div className="flex w-full justify-between items-center">
@@ -329,7 +353,6 @@ export default function EditScheduleModal({
                     </div>
 
                     {rows.map((row) => {
-                        // console.log(scheduleData[row.id]);
                         return (
                             <div key={row.id} className="flex flex-row">
                                 <GenerateNewScheduleRowWithData
@@ -338,7 +361,11 @@ export default function EditScheduleModal({
                                     groupId={groupId}
                                     classroomId={classroomId}
                                     onChange={handleRowChange}
-                                    initData={scheduleData[row.id]}
+                                    initData={
+                                        row.id < scheduleData.length
+                                            ? scheduleData[row.id]
+                                            : []
+                                    }
                                 />
                                 <button
                                     onClick={() => deleteRow(row.id)}
