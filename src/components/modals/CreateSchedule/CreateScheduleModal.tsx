@@ -7,6 +7,9 @@ import GenerateNewScheduleRow from "./GenerateNewScheduleRow";
 import { useCallback, useEffect, useState } from "react";
 import SelectPicker from "rsuite/SelectPicker";
 import "rsuite/SelectPicker/styles/index.css";
+import { useADDSchedule } from "../../../hooks/useADDSchedule";
+import { useGETClassrooms } from "../../../hooks/useGETClassrooms";
+import { useGETGroupsFilters } from "../../../hooks/useGETGroupsFilters";
 
 interface Props {
     isOpen: boolean;
@@ -51,6 +54,9 @@ export default function CreateScheduleModal({
     const [classrooms, setClassrooms] = useState<any>();
     const [isComplete, setIsComplete] = useState<boolean>(false);
     const [withData, setWithData] = useState<boolean>(false);
+    const query = useADDSchedule();
+    const queryGroups = useGETGroupsFilters();
+    const queryClassrooms = useGETClassrooms();
 
     //Se crea la fila inicial evitando el React StrictMode
     const initialRow: Row = { id: 0 };
@@ -66,48 +72,32 @@ export default function CreateScheduleModal({
 
     // Carga inicial de grupos y salones
     useEffect(() => {
-        async function loadMeta() {
-            try {
-                const [gRes, sRes] = await Promise.all([
-                    fetch(
-                        "https://schedulechecker.up.railway.app/api/groups/filter"
-                    ),
-                    fetch(
-                        "https://schedulechecker.up.railway.app/api/classrooms"
-                    ),
-                ]);
-                if (!gRes.ok || !sRes.ok) {
-                    throw new Error("Error al cargar datos");
-                }
-                // GRUPOS
-                const groupsJson = await gRes.json();
-                const groupsFormat = groupsJson.data.map((data: GrupoRaw) => ({
+        if (queryGroups.error || queryClassrooms.error) {
+            Swal.fire({
+                theme: "dark",
+                icon: "error",
+                title: "Oops...",
+                text: "Error al cargar los datos! Intente más tarde.",
+            });
+        } else if (queryGroups.isSuccess && queryClassrooms.isSuccess) {
+            // GRUPOS
+            const groupsFormat = queryGroups.data.data.map(
+                (data: GrupoRaw) => ({
                     label: data.name,
                     value: data.group_id,
-                }));
-                setGroups(groupsFormat);
+                })
+            );
+            setGroups(groupsFormat);
 
-                // SALONES
-                const classroomsJson = await sRes.json();
-                const classroomsFormat = classroomsJson.classrooms.map(
-                    (data: classroomsData) => ({
-                        label: data.name,
-                        value: data.id,
-                    })
-                );
-                setClassrooms(classroomsFormat);
-            } catch (err) {
-                console.error(err);
-                Swal.fire({
-                    theme: "dark",
-                    icon: "error",
-                    title: "Oops...",
-                    text: "Error al cargar los datos! Intente más tarde.",
-                });
-            }
+            // SALONES
+            const classroomsFormat = queryClassrooms.data.classrooms.map(
+                (data: classroomsData) => ({
+                    label: data.name,
+                    value: data.id,
+                })
+            );
+            setClassrooms(classroomsFormat);
         }
-
-        loadMeta();
     }, []);
 
     //Verificar salon, grupo y las rows
@@ -146,36 +136,29 @@ export default function CreateScheduleModal({
         const validPayloads = rowsData
             .map((r) => r.data)
             .filter((d): d is object => d !== undefined);
-        try {
-            const payload = validPayloads;
-            const res = await fetch(
-                "https://schedulechecker.up.railway.app/api/class",
-                {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload),
-                }
-            );
 
-            const json = await res.json();
-            if (!res.ok) {
-                throw json;
-            }
-
-            Swal.fire({
-                theme: "dark",
-                icon: "success",
-                title: "¡Listo!",
-                text: "Horario creado exitosamente.",
-            });
-        } catch (err: any) {
-            Swal.fire({
-                theme: "dark",
-                icon: "error",
-                title: err.message || "Error inesperado",
-                text: err.errors || "Por favor inténtalo de nuevo.",
-            });
-        }
+        query.mutate(validPayloads, {
+            onSuccess: () => {
+                Swal.fire({
+                    theme: "dark",
+                    icon: "success",
+                    title: "¡Listo!",
+                    text: "Horario creado exitosamente.",
+                });
+                onClose();
+            },
+            onError: (error: any) => {
+                Swal.fire({
+                    theme: "dark",
+                    icon: "error",
+                    title: "Error al crear el horario",
+                    text:
+                        error?.response?.data?.errors ||
+                        error?.message ||
+                        "Por favor inténtalo de nuevo.",
+                });
+            },
+        });
     };
 
     const GenerateNewRow = () => {

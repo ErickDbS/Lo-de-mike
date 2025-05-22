@@ -5,6 +5,9 @@ import SelectPicker from "rsuite/SelectPicker";
 import "rsuite/SelectPicker/styles/index.css";
 import { CircleCheck, CircleX } from "lucide-react";
 import Swal from "sweetalert2";
+import { useGETMasters } from "../../../hooks/useGETMasters";
+import { useGetSet } from "react-use";
+import { useGETSubjects } from "../../../hooks/useGETSubjects";
 
 interface Props {
     id: number;
@@ -80,6 +83,8 @@ export default function GenerateNewScheduleRow({
     const [json, setJson] = useState<object>();
     const [withData, setWithData] = useState<boolean>(false);
     const [allFilledRow, setAllFilledRow] = useState<boolean>(false);
+    const queryMasters = useGETMasters();
+    const querySubjects = useGETSubjects();
 
     //States data
     const [masters, setMasters] = useState<any>();
@@ -88,48 +93,34 @@ export default function GenerateNewScheduleRow({
     const [units, setUnits] = useState<any>();
 
     // Carga inicial de los datos
+
     useEffect(() => {
-        async function loadMeta() {
-            try {
-                const [mastersRes, subjectsRes] = await Promise.all([
-                    fetch("https://schedulechecker.up.railway.app/api/masters"),
-                    fetch(
-                        "https://schedulechecker.up.railway.app/api/subjects"
-                    ),
-                ]);
-                if (!mastersRes.ok || !subjectsRes.ok) {
-                    throw new Error("Error al cargar datos");
-                }
-                // MAESTROS
-                const mastersJson = await mastersRes.json();
-                const mastersFormat = mastersJson.masters.map(
-                    (data: MastersData) => ({
-                        label: `${data.acronym} ${data.lastname} ${data.name} `,
-                        value: data.master_id,
-                    })
-                );
-                setMasters(mastersFormat);
+        if (queryMasters.error || querySubjects.error) {
+            Swal.fire({
+                theme: "dark",
+                icon: "error",
+                title: "Oops...",
+                text: "Error al cargar los datos! Intente más tarde.",
+            });
+        } else if (queryMasters.isSuccess && querySubjects.isSuccess) {
+            // GRUPOS
+            const mastersFormat = queryMasters.data.masters.map(
+                (data: MastersData) => ({
+                    label: data.name,
+                    value: data.master_id,
+                })
+            );
+            setMasters(mastersFormat);
 
-                // MATERIAS
-                const subjectsJson = await subjectsRes.json();
-                const subjectsFormat = subjectsJson.subjects.map(
-                    (data: SubjectsData) => ({
-                        label: data.name,
-                        value: data.subject_id,
-                    })
-                );
-                setSubjects(subjectsFormat);
-            } catch (err) {
-                Swal.fire({
-                    theme: "dark",
-                    icon: "error",
-                    title: "Oops...",
-                    text: "Error al cargar los datos! Intente más tarde.",
-                });
-            }
+            // SALONES
+            const subjectsFormat = querySubjects.data.subjects.map(
+                (data: SubjectsData) => ({
+                    label: data.name,
+                    value: data.subject_id,
+                })
+            );
+            setSubjects(subjectsFormat);
         }
-
-        loadMeta();
     }, []);
 
     useEffect(() => {

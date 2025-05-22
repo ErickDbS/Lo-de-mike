@@ -7,6 +7,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import SelectPicker from "rsuite/SelectPicker";
 import "rsuite/SelectPicker/styles/index.css";
 import GenerateNewScheduleRowWithData from "./GenerateNewScheduleRowWithData";
+import { useGETClassrooms } from "../../../hooks/useGETClassrooms";
+import { useGETScheduleByCaarerAndGroup } from "../../../hooks/useGETScheduleByCareerAndGroup";
+import { useGETGroups } from "../../../hooks/useGETGroups";
 
 interface Props {
     isOpen: boolean;
@@ -61,64 +64,60 @@ export default function EditScheduleModal({
     const [rows, setRows] = useState<Row[]>([]);
     const [rowsData, setRowsData] = useState<RowData[]>([]);
     const hasGeneratedRows = useRef(false);
-    const [loading, setLoading] = useState(true);
+    const queryGroups = useGETGroups();
+    const queryClassrooms = useGETClassrooms();
+    const queryScheduleByCareerAndGroup = useGETScheduleByCaarerAndGroup(
+        career_Id,
+        group_Id
+    );
 
     // Carga inicial de grupos y salones
     useEffect(() => {
-        async function loadMeta() {
-            try {
-                const [gRes, sRes, dRes] = await Promise.all([
-                    fetch("https://schedulechecker.up.railway.app/api/groups"),
-                    fetch(
-                        "https://schedulechecker.up.railway.app/api/classrooms"
-                    ),
-                    fetch(
-                        `https://schedulechecker.up.railway.app/api/class/career/${career_Id}/${group_Id}`
-                    ),
-                ]);
-                if (!gRes.ok || !sRes.ok || !dRes.ok) {
-                    throw new Error("Error al cargar datos");
-                }
+        if (
+            queryGroups.error ||
+            queryClassrooms.error ||
+            queryScheduleByCareerAndGroup.error
+        ) {
+            Swal.fire({
+                theme: "dark",
+                icon: "error",
+                title: "Oops...",
+                text: "Error al cargar los datos! Intente más tarde.",
+            });
+        } else if (
+            queryGroups.isSuccess &&
+            queryClassrooms.isSuccess &&
+            queryScheduleByCareerAndGroup.isSuccess
+        ) {
+            // GRUPOS
+            const groupsFormat = queryGroups.data.groups.map(
+                (data: GrupoRaw) => ({
+                    label: data.name,
+                    value: data.group_id,
+                })
+            );
+            setGroups(groupsFormat);
 
-                // GRUPOS
-                const groupsJson = await gRes.json();
-                const groupsFormat = groupsJson.groups.map(
-                    (data: GrupoRaw) => ({
-                        label: data.name,
-                        value: data.group_id,
-                    })
-                );
-                setGroups(groupsFormat);
+            // SALONES
+            const classroomsFormat = queryClassrooms.data.classrooms.map(
+                (data: classroomsData) => ({
+                    label: data.name,
+                    value: data.id,
+                })
+            );
+            setClassrooms(classroomsFormat);
 
-                // SALONES
-                const classroomsJson = await sRes.json();
-                const classroomsFormat = classroomsJson.classrooms.map(
-                    (data: classroomsData) => ({
-                        label: data.name,
-                        value: data.id,
-                    })
-                );
-                setClassrooms(classroomsFormat);
-
-                // Datos del horario
-                const SchedulesData = await dRes.json();
-                setScheduleData(SchedulesData.classes);
-            } catch (err) {
-                console.error(err);
-                Swal.fire({
-                    theme: "dark",
-                    icon: "error",
-                    title: "Oops...",
-                    text: "Error al cargar los datos! Intente más tarde.",
-                });
-            }
+            //Datos del horario
+            setScheduleData(queryScheduleByCareerAndGroup.data.classes);
         }
-
-        loadMeta();
     }, []);
 
     useEffect(() => {
-        if (loading) {
+        if (
+            queryGroups.isLoading ||
+            queryClassrooms.isLoading ||
+            queryScheduleByCareerAndGroup.isLoading
+        ) {
             Swal.fire({
                 toast: true,
                 position: "bottom-end",
@@ -134,7 +133,11 @@ export default function EditScheduleModal({
         } else {
             Swal.close();
         }
-    }, [loading]);
+    }, [
+        queryGroups.isLoading,
+        queryClassrooms.isLoading,
+        queryScheduleByCareerAndGroup.isLoading,
+    ]);
 
     //Cargamos rows iniciales
 
@@ -225,7 +228,6 @@ export default function EditScheduleModal({
                 { id: i, isComplete: false, data: undefined },
             ]);
         }
-        setLoading(false);
     };
 
     const GenerateNewRow = () => {
@@ -287,7 +289,12 @@ export default function EditScheduleModal({
         }
     };
 
-    if (loading) return null;
+    if (
+        queryGroups.isLoading ||
+        queryClassrooms.isLoading ||
+        queryScheduleByCareerAndGroup.isLoading
+    )
+        return null;
 
     return (
         <Modal
