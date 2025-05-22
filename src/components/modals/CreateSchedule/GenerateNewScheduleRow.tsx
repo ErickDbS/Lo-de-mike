@@ -8,6 +8,7 @@ import Swal from "sweetalert2";
 import { useGETMasters } from "../../../hooks/useGETMasters";
 import { useGetSet } from "react-use";
 import { useGETSubjects } from "../../../hooks/useGETSubjects";
+import { useGETUnits } from "../../../hooks/useGETUnits";
 
 interface Props {
     id: number;
@@ -85,6 +86,7 @@ export default function GenerateNewScheduleRow({
     const [allFilledRow, setAllFilledRow] = useState<boolean>(false);
     const queryMasters = useGETMasters();
     const querySubjects = useGETSubjects();
+    const queryUnits = useGETUnits(subject);
 
     //States data
     const [masters, setMasters] = useState<any>();
@@ -93,7 +95,6 @@ export default function GenerateNewScheduleRow({
     const [units, setUnits] = useState<any>();
 
     // Carga inicial de los datos
-
     useEffect(() => {
         if (queryMasters.error || querySubjects.error) {
             Swal.fire({
@@ -177,37 +178,27 @@ export default function GenerateNewScheduleRow({
         onChange,
     ]);
 
-    const onChangeSubject = async (value: any) => {
-        setSubject(value);
-        //si hay una opcion elegida hago la peticion
-        if (value) {
-            try {
-                const [unitsRes] = await Promise.all([
-                    fetch(
-                        `https://schedulechecker.up.railway.app/api/units/subjects/${value}`
-                    ),
-                ]);
-                if (!unitsRes.ok) throw new Error("Error al cargar datos");
-                // Unidades
-                const unitsJson = await unitsRes.json();
-                const unitsFormat = unitsJson.units.map((data: UnitsData) => ({
+    //Recargar las unidades dependiendo la materia
+    useEffect(() => {
+        if (queryUnits.error) {
+            Swal.fire({
+                theme: "dark",
+                icon: "error",
+                title: "Oops...",
+                text: "La materia no cuenta con unidades. Intente con otra materia.",
+            });
+            setUnits([]);
+        } else if (queryUnits.isSuccess) {
+            const unitsFormat = queryUnits.data.units.map(
+                (data: UnitsData) => ({
                     label: `${data.unit_number} ${data.title}`,
                     value: data.unit_id,
-                }));
-                setUnits(unitsFormat);
-            } catch (err) {
-                Swal.fire({
-                    theme: "dark",
-                    icon: "error",
-                    title: "Oops...",
-                    text: "La materia no cuenta con unidades. Intente con otra materia.",
-                });
-            }
+                })
+            );
+            setUnitDisable(false);
+            setUnits(unitsFormat);
         }
-
-        //Activo o desactivo el campo de la unidad
-        setUnitDisable(value === null);
-    };
+    }, [queryUnits.error, queryUnits.isSuccess, queryUnits.data]);
 
     const onChangeUnits = async (value: any) => {
         setUnit(value);
@@ -284,7 +275,7 @@ export default function GenerateNewScheduleRow({
                         placeholder=""
                         className="w-[224]"
                         value={subject}
-                        onChange={(value) => onChangeSubject(value)}
+                        onChange={(value) => setSubject(value)}
                     />
                     <div
                         title={
