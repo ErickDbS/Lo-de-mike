@@ -1,10 +1,17 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Card from "../../components/Cards/CardSchedule/Card";
 import Schedule from "../../components/schedule/Schedule";
 import { useFetch } from "../../hooks/useFetch";
+import { AuthContext } from "../../utils/authContext";
+import GroupAttendance from "../../components/GroupAttendance/GroupAttendance";
 
 export default function Home() {
-    const { data } = useFetch("https://schedulechecker.up.railway.app/api/class", {
+    const apiUrl = import.meta.env.VITE_API_URL;
+    const authContext = useContext(AuthContext) as any;
+    const userRole: any = authContext.storage.role;
+    const [name, setName] = useState("");
+    
+    const { data } = useFetch(`${apiUrl}/class`, {
         method: "GET",
     });
 
@@ -26,14 +33,15 @@ export default function Home() {
 
     const group = localStorage.getItem("group_name");
 
-    if (!group) {
-        console.error("No hay grupo en localStorage");
-        return null;
-    }
-
 
 
     useEffect(() => {
+        const userJson = localStorage.getItem("UserData")
+        if (userJson) {
+            const userData = JSON.parse(userJson);
+            setName(userData.name);
+        }
+
         if (!data || !data.classes) return;
     
         // Obtener grupo desde localStorage
@@ -87,27 +95,61 @@ export default function Home() {
     }, [data, group]);
 
     const aula = localStorage.getItem("aula_del_grupo");
-
-    
     
 
-    return (
-        <div className="flex flex-col items-center justify-center">
-            <div className="w-full max-w-5xl flex items-center justify-center rounded text-white">
-                <Schedule grupo={group} aula={aula ?? "Sin aula"} horarios={horarios} />
+    if (userRole === 1) {
+        // Jef@ de grupo
+            if (!group) {
+                console.error("No hay grupo en localStorage");
+                return null;
+            }
+        return (
+            
+            <div className="flex flex-col items-center justify-center">
+                <div className="w-full max-w-5xl flex items-center justify-center rounded text-white">
+                    <Schedule grupo={group} aula={aula ?? "Sin aula"} horarios={horarios} />
+                </div>
+
+                <div className="mt-10 bg-[#1e2022] flex flex-col items-center justify-center rounded text-white">
+                    <Card
+                        nameProfesor={claseActual?.profesor ?? "Sin profesor"}
+                        nameMateria={claseActual?.materia ?? "No hay materia actualmente"}
+                        Tema={claseActual?.tema ?? "-"}
+                        Hora={claseActual?.hora ?? "-"}
+                        mostrarBoton={!!claseActual}
+                    />
+                </div>
             </div>
-
-            <div className="mt-10 bg-[#1e2022] flex flex-col items-center justify-center rounded text-white">
-
-
-                <Card
-                    nameProfesor={claseActual?.profesor ?? "Sin profesor"}
-                    nameMateria={claseActual?.materia ?? "No hay materia actualmente"}
-                    Tema={claseActual?.tema ?? "-"}
-                    Hora={claseActual?.hora ?? "-"}
-                    mostrarBoton={!!claseActual} // ⬅️ Mostrar botón solo si hay clase
-                />
+        );
+    } else if (userRole === 2) {
+        // Maestr@
+        return (
+            <div className="text-white text-center mt-10">
+                <h1>¡Bienvenido Maestr@!</h1>
+                <p>En esta sección verás tus clases y podrás justificar faltas.</p>
             </div>
-        </div>
-    );
+        );
+    } else if (userRole === 3) {
+        // Checador@
+        return (
+            <div className="text-white text-center mt-10">
+                <h1 className="text-4xl text-white">¡Bienvenido {name}</h1>
+                <GroupAttendance />
+            </div>
+        );
+    } else if (userRole === 4) {
+        // Jef@ de carrera
+        return (
+            <div className="text-white text-center mt-10">
+                <h1>¡Bienvenid@ Jef@ de carrera!</h1>
+                <p>Visualiza el control total de los horarios.</p>
+            </div>
+        );
+    } else {
+        return (
+            <div className="text-white text-center mt-10">
+                <p>Rol no reconocido.</p>
+            </div>
+        );
+    }
 }

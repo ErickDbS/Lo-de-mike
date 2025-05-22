@@ -17,6 +17,8 @@ interface RegisterResponse {
 }
 
 export default function Register() {
+    const apiUrl = import.meta.env.VITE_API_URL
+
     const authContext = useContext(AuthContext) as any;
     const [confirmPassword, setConfirmPassword] = useState("");
     const [error, setError] = useState("");
@@ -29,7 +31,7 @@ export default function Register() {
     // Obtener grupos
     const {
         data: groupsResponse,
-    } = useFetch<{ groups: Group[] }>("https://schedulechecker.up.railway.app/api/groups", {
+    } = useFetch<{ groups: Group[] }>(`${apiUrl}/groups`, {
         method: "GET",
     });
 
@@ -103,7 +105,7 @@ export default function Register() {
             }
         }
     
-        doFetch("https://schedulechecker.up.railway.app/api/users", {
+        doFetch(`${apiUrl}/users`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(formData),

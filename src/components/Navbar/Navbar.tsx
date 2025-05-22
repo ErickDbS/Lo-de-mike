@@ -20,11 +20,6 @@ export default function Navbar() {
     > = {
         1: [
             {
-                path: "/history",
-                label: "Historial de Clases",
-                title: "Ver las clases pasadas y asistencia del profesores.",
-            },
-            {
                 path: "/assists",
                 label: "Asistencias de los profesores",
                 title: "Marcar asistencias de los profesores.",

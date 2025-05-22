@@ -7,6 +7,7 @@ import { useFetch } from "../../hooks/useFetch";
 import { AuthContext } from "../../utils/authContext";
 
 export default function Login() {
+    const apiUrl = import.meta.env.VITE_API_URL
     const authContext = useContext(AuthContext) as any;
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
@@ -47,7 +48,7 @@ export default function Login() {
     } = useForm();
 
     const onSubmit = (data: object) => {
-        doFetch("https://schedulechecker.up.railway.app/api/login", {
+        doFetch(`${apiUrl}/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),

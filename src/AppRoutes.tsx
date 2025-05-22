@@ -36,6 +36,7 @@ export default function AppRoutes() {
                             path="/home"
                             element={userRole === 4 ? <HomeAdmin /> : <Home />}
                         />
+
                         <Route path="/schedules" element={<Schedule />} />
                         <Route path="/history" element={<History />} />
                         <Route path="/reports" element={<Reports />} />
