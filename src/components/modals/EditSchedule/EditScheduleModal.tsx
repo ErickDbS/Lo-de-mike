@@ -124,7 +124,6 @@ export default function EditScheduleModal({
 
             //Datos del horario
             setScheduleData(queryScheduleByCareerAndGroup.data.classes);
-            console.log("me ejecute");
         }
     }, [
         queryGroups.error,

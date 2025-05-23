@@ -1,11 +1,10 @@
 import TimePicker from "rsuite/esm/TimePicker";
 import "rsuite/TimePicker/styles/index.css";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import SelectPicker from "rsuite/SelectPicker";
 import "rsuite/SelectPicker/styles/index.css";
 import { CircleCheck, CircleX } from "lucide-react";
 import Swal from "sweetalert2";
-import { data } from "react-router-dom";
 import { useGETMasters } from "../../../hooks/useGETMasters";
 import { useGETSubjects } from "../../../hooks/useGETSubjects";
 import { useGETTopics } from "../../../hooks/useGETTopics";
@@ -87,6 +86,7 @@ export default function GenerateNewScheduleRowWithData({
     const [json, setJson] = useState<object>();
     const [withData, setWithData] = useState<boolean>(false);
     const [allFilledRow, setAllFilledRow] = useState<boolean>(false);
+    const isFirstSubjectLoad = useRef(true);
 
     //Peticiones
     const queryMasters = useGETMasters();
@@ -127,7 +127,7 @@ export default function GenerateNewScheduleRowWithData({
                 text: "Error al cargar los datos! Intente más tarde.",
             });
         } else if (queryMasters.isSuccess && querySubjects.isSuccess) {
-            // GRUPOS
+            // Profesores
             const mastersFormat = queryMasters.data.masters.map(
                 (data: MastersData) => ({
                     label: `${data.acronym} ${data.lastname} ${data.name}`,
@@ -136,7 +136,7 @@ export default function GenerateNewScheduleRowWithData({
             );
             setMasters(mastersFormat);
 
-            // SALONES
+            // Materias
             const subjectsFormat = querySubjects.data.subjects.map(
                 (data: SubjectsData) => ({
                     label: `${data.name} - Semestre ${data.semester}`,
@@ -169,6 +169,16 @@ export default function GenerateNewScheduleRowWithData({
             !!(startTime || endTime || master || subject || topic || unit)
         );
 
+        if (isLab())
+            setWithData(
+                !!groupId &&
+                    !!classroomId &&
+                    !!startTime &&
+                    !!endTime &&
+                    !!master &&
+                    !!subject
+            );
+
         setAllFilledRow(
             !!startTime &&
                 !!endTime &&
@@ -177,6 +187,9 @@ export default function GenerateNewScheduleRowWithData({
                 !!topic &&
                 !!unit
         );
+
+        if (isLab())
+            setAllFilledRow(!!startTime && !!endTime && !!master && !!subject);
 
         const payload = allFilled
             ? {
@@ -208,23 +221,46 @@ export default function GenerateNewScheduleRowWithData({
         onChange,
     ]);
 
-    function parseTimeStringToDate(timeString: string) {
+    const isLab = (): boolean => {
+        if (!subjects || !subject) return false;
+        const nameSubject = subjects
+            .find((sub: any) => sub.value === subject)
+            .label.split(" ");
+        return nameSubject[0] === "LABORATORIO";
+    };
+
+    const parseTimeStringToDate = (timeString: string) => {
         const [hours, minutes, seconds] = timeString.split(":").map(Number);
         const date = new Date();
         date.setHours(hours, minutes, seconds || 0, 0); // hh, mm, ss, ms
         return date;
-    }
+    };
 
     //Recargar las unidades dependiendo la materia
     useEffect(() => {
         if (queryUnits.error) {
-            Swal.fire({
-                theme: "dark",
-                icon: "error",
-                title: "Oops...",
-                text: "La materia no cuenta con unidades. Intente con otra materia.",
-            });
+            //Si la materia es un laboratorio.
+            if (isLab()) {
+                Swal.fire({
+                    theme: "dark",
+                    icon: "info",
+                    title: "¡Importante!",
+                    text: "Los laboratorios no cuentan con unidades ni temas.",
+                });
+            } else {
+                Swal.fire({
+                    theme: "dark",
+                    icon: "error",
+                    title: "Oops...",
+                    text: "La materia no cuenta con unidades. Intente con otra materia.",
+                });
+            }
+            setUnitDisable(true);
+            setTopicDisable(true);
             setUnits([]);
+            setTopics([]);
+            setUnit("");
+            setTopic("");
         } else if (queryUnits.isSuccess) {
             const unitsFormat = queryUnits.data.units.map(
                 (data: UnitsData) => ({
@@ -233,7 +269,15 @@ export default function GenerateNewScheduleRowWithData({
                 })
             );
             setUnitDisable(false);
+            setTopicDisable(true);
+            setTopics([]);
             setUnits(unitsFormat);
+            if (isFirstSubjectLoad.current) {
+                isFirstSubjectLoad.current = false;
+                return;
+            }
+            setTopic("");
+            setUnit("");
         }
     }, [queryUnits.error, queryUnits.isSuccess, queryUnits.data, subject]);
 
@@ -306,7 +350,10 @@ export default function GenerateNewScheduleRowWithData({
                     />
                     <div
                         title={
-                            isUnitDisable && "Primero seleccione una materia."
+                            isLab()
+                                ? "Los laboratorios no cuentan con unidades ni temas."
+                                : isUnitDisable &&
+                                  "Primero seleccione una materia."
                         }
                         className="w-full"
                     >
@@ -321,7 +368,10 @@ export default function GenerateNewScheduleRowWithData({
                     </div>
                     <div
                         title={
-                            isTopicDisable && "Primero seleccione una unidad."
+                            isLab()
+                                ? "Los laboratorios no cuentan con unidades ni temas."
+                                : isTopicDisable &&
+                                  "Primero seleccione una unidad."
                         }
                         className="w-full"
                     >

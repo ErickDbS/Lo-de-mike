@@ -6,7 +6,6 @@ import "rsuite/SelectPicker/styles/index.css";
 import { CircleCheck, CircleX } from "lucide-react";
 import Swal from "sweetalert2";
 import { useGETMasters } from "../../../hooks/useGETMasters";
-import { useGetSet } from "react-use";
 import { useGETSubjects } from "../../../hooks/useGETSubjects";
 import { useGETUnits } from "../../../hooks/useGETUnits";
 import { useGETTopics } from "../../../hooks/useGETTopics";
@@ -108,7 +107,7 @@ export default function GenerateNewScheduleRow({
                 text: "Error al cargar los datos! Intente más tarde.",
             });
         } else if (queryMasters.isSuccess && querySubjects.isSuccess) {
-            // GRUPOS
+            // Profesores
             const mastersFormat = queryMasters.data.masters.map(
                 (data: MastersData) => ({
                     label: `${data.acronym} ${data.lastname} ${data.name}`,
@@ -117,7 +116,7 @@ export default function GenerateNewScheduleRow({
             );
             setMasters(mastersFormat);
 
-            // SALONES
+            // Materias
             const subjectsFormat = querySubjects.data.subjects.map(
                 (data: SubjectsData) => ({
                     label: `${data.name} - Semestre ${data.semester}`,
@@ -150,6 +149,16 @@ export default function GenerateNewScheduleRow({
             !!(startTime || endTime || master || subject || topic || unit)
         );
 
+        if (isLab())
+            setWithData(
+                !!groupId &&
+                    !!classroomId &&
+                    !!startTime &&
+                    !!endTime &&
+                    !!master &&
+                    !!subject
+            );
+
         setAllFilledRow(
             !!startTime &&
                 !!endTime &&
@@ -158,6 +167,9 @@ export default function GenerateNewScheduleRow({
                 !!topic &&
                 !!unit
         );
+
+        if (isLab())
+            setAllFilledRow(!!startTime && !!endTime && !!master && !!subject);
 
         const payload = allFilled
             ? {
@@ -189,16 +201,39 @@ export default function GenerateNewScheduleRow({
         onChange,
     ]);
 
+    const isLab = (): boolean => {
+        if (!subjects || !subject) return false;
+        const nameSubject = subjects
+            .find((sub: any) => sub.value === subject)
+            .label.split(" ");
+        return nameSubject[0] === "LABORATORIO";
+    };
+
     //Recargar las unidades dependiendo la materia
     useEffect(() => {
         if (queryUnits.error) {
-            Swal.fire({
-                theme: "dark",
-                icon: "error",
-                title: "Oops...",
-                text: "La materia no cuenta con unidades. Intente con otra materia.",
-            });
+            //Si la materia es un laboratorio.
+            if (isLab()) {
+                Swal.fire({
+                    theme: "dark",
+                    icon: "info",
+                    title: "¡Importante!",
+                    text: "Los laboratorios no cuentan con unidades ni temas.",
+                });
+            } else {
+                Swal.fire({
+                    theme: "dark",
+                    icon: "error",
+                    title: "Oops...",
+                    text: "La materia no cuenta con unidades. Intente con otra materia.",
+                });
+            }
+            setUnitDisable(true);
+            setTopicDisable(true);
             setUnits([]);
+            setTopics([]);
+            setUnit("");
+            setTopic("");
         } else if (queryUnits.isSuccess) {
             const unitsFormat = queryUnits.data.units.map(
                 (data: UnitsData) => ({
@@ -207,6 +242,8 @@ export default function GenerateNewScheduleRow({
                 })
             );
             setUnitDisable(false);
+            setUnit("");
+            setTopic("");
             setUnits(unitsFormat);
         }
     }, [queryUnits.error, queryUnits.isSuccess, queryUnits.data]);
@@ -229,6 +266,7 @@ export default function GenerateNewScheduleRow({
                 })
             );
             setTopicDisable(false);
+            setTopic("");
             setTopics(topicsFormat);
         }
     }, [queryTopics.error, queryTopics.isSuccess, queryTopics.data]);
@@ -278,7 +316,10 @@ export default function GenerateNewScheduleRow({
                     />
                     <div
                         title={
-                            isUnitDisable && "Primero seleccione una materia."
+                            isLab()
+                                ? "Los laboratorios no cuentan con unidades ni temas."
+                                : isUnitDisable &&
+                                  "Primero seleccione una materia."
                         }
                         className="w-full"
                     >
@@ -293,7 +334,10 @@ export default function GenerateNewScheduleRow({
                     </div>
                     <div
                         title={
-                            isTopicDisable && "Primero seleccione una unidad."
+                            isLab()
+                                ? "Los laboratorios no cuentan con unidades ni temas."
+                                : isTopicDisable &&
+                                  "Primero seleccione una unidad."
                         }
                         className="w-full"
                     >
