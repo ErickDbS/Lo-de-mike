@@ -120,7 +120,7 @@ export default function GenerateNewScheduleRow({
             // SALONES
             const subjectsFormat = querySubjects.data.subjects.map(
                 (data: SubjectsData) => ({
-                    label: data.name,
+                    label: `${data.name} - Semestre ${data.semester}`,
                     value: data.subject_id,
                 })
             );
