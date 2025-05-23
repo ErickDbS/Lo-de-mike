@@ -10,6 +10,8 @@ import GenerateNewScheduleRowWithData from "./GenerateNewScheduleRowWithData";
 import { useGETClassrooms } from "../../../hooks/useGETClassrooms";
 import { useGETScheduleByCaarerAndGroup } from "../../../hooks/useGETScheduleByCareerAndGroup";
 import { useGETGroups } from "../../../hooks/useGETGroups";
+import { useEDITSchedule } from "../../../hooks/useEDITSchedule";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface Props {
     isOpen: boolean;
@@ -63,13 +65,26 @@ export default function EditScheduleModal({
     const [scheduleData, setScheduleData] = useState<any>();
     const [rows, setRows] = useState<Row[]>([]);
     const [rowsData, setRowsData] = useState<RowData[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
     const hasGeneratedRows = useRef(false);
+    const query = useEDITSchedule(groupId);
     const queryGroups = useGETGroups();
     const queryClassrooms = useGETClassrooms();
+    const queryClient = useQueryClient();
     const queryScheduleByCareerAndGroup = useGETScheduleByCaarerAndGroup(
         career_Id,
         group_Id
     );
+
+    // Resetear filas cada vez que el modal se abra
+    useEffect(() => {
+        if (isOpen) {
+            setRows([]); // limpiar filas
+            setRowsData([]); // limpiar datos de filas
+            hasGeneratedRows.current = false; // permitir regenerar desde scheduleData
+            setLoading(true); // volver al estado de loading
+        }
+    }, [isOpen]);
 
     // Carga inicial de grupos y salones
     useEffect(() => {
@@ -109,14 +124,26 @@ export default function EditScheduleModal({
 
             //Datos del horario
             setScheduleData(queryScheduleByCareerAndGroup.data.classes);
+            console.log("me ejecute");
         }
-    }, []);
+    }, [
+        queryGroups.error,
+        queryGroups.isSuccess,
+        queryGroups.data,
+        queryClassrooms.error,
+        queryClassrooms.isSuccess,
+        queryClassrooms.data,
+        queryScheduleByCareerAndGroup.error,
+        queryScheduleByCareerAndGroup.isSuccess,
+        queryScheduleByCareerAndGroup.data,
+    ]);
 
     useEffect(() => {
         if (
             queryGroups.isLoading ||
             queryClassrooms.isLoading ||
-            queryScheduleByCareerAndGroup.isLoading
+            queryScheduleByCareerAndGroup.isLoading ||
+            loading
         ) {
             Swal.fire({
                 toast: true,
@@ -137,10 +164,10 @@ export default function EditScheduleModal({
         queryGroups.isLoading,
         queryClassrooms.isLoading,
         queryScheduleByCareerAndGroup.isLoading,
+        loading,
     ]);
 
     //Cargamos rows iniciales
-
     useEffect(() => {
         if (
             scheduleData &&
@@ -188,36 +215,32 @@ export default function EditScheduleModal({
         const validPayloads = rowsData
             .map((r) => r.data)
             .filter((d): d is object => d !== undefined);
-        try {
-            const payload = validPayloads;
-            const res = await fetch(
-                `https://schedulechecker.up.railway.app/api/class/${group_Id}`,
-                {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload),
-                }
-            );
-
-            const json = await res.json();
-            if (!res.ok) {
-                throw json;
-            }
-
-            Swal.fire({
-                theme: "dark",
-                icon: "success",
-                title: "¡Listo!",
-                text: "Horario creado exitosamente.",
-            });
-        } catch (err: any) {
-            Swal.fire({
-                theme: "dark",
-                icon: "error",
-                title: err.message || "Error inesperado",
-                text: err.errors || "Por favor inténtalo de nuevo.",
-            });
-        }
+        query.mutate(validPayloads, {
+            onSuccess: () => {
+                queryClient.invalidateQueries({
+                    queryKey: ["scheduleByCareerAndGroup", career_Id, groupId],
+                    exact: true,
+                });
+                Swal.fire({
+                    theme: "dark",
+                    icon: "success",
+                    title: "¡Listo!",
+                    text: "Horario editado exitosamente.",
+                });
+                onClose();
+            },
+            onError: (error: any) => {
+                Swal.fire({
+                    theme: "dark",
+                    icon: "error",
+                    title: "Error al editar el horario",
+                    text:
+                        error?.response?.data?.errors ||
+                        error?.message ||
+                        "Por favor inténtalo de nuevo.",
+                });
+            },
+        });
     };
 
     const GenerateInitialRows = () => {
@@ -228,6 +251,7 @@ export default function EditScheduleModal({
                 { id: i, isComplete: false, data: undefined },
             ]);
         }
+        setLoading(false);
     };
 
     const GenerateNewRow = () => {
@@ -292,7 +316,8 @@ export default function EditScheduleModal({
     if (
         queryGroups.isLoading ||
         queryClassrooms.isLoading ||
-        queryScheduleByCareerAndGroup.isLoading
+        queryScheduleByCareerAndGroup.isLoading ||
+        loading
     )
         return null;
 

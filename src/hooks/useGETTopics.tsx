@@ -2,21 +2,16 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
 interface ApiResponse {
-    classes: any[];
+    topics: any[];
     status: any;
 }
 
 const BASE_URL = import.meta.env.VITE_API_URL as string;
 
-export const useGETScheduleByCaarerAndGroup = (
-    career_Id: string,
-    group_Id: string
-) => {
-    const getSchedule = async (): Promise<ApiResponse> => {
+export const useGETTopics = (unit?: string) => {
+    const getTopics = async (): Promise<ApiResponse> => {
         try {
-            const response = await axios.get(
-                `${BASE_URL}/class/career/${career_Id}/${group_Id}`
-            );
+            const response = await axios.get(`${BASE_URL}/topics/unit/${unit}`);
             return response.data;
         } catch (error: any) {
             if (error.response) {
@@ -32,11 +27,11 @@ export const useGETScheduleByCaarerAndGroup = (
         }
     };
 
-    const query = useQuery({
-        queryKey: ["scheduleByCareerAndGroup", career_Id, group_Id],
-        queryFn: getSchedule,
-        enabled: Boolean(career_Id && group_Id),
+    return useQuery({
+        queryKey: ["topics", unit],
+        queryFn: getTopics,
+        enabled: !!unit,
+        retry: false,
         refetchOnMount: true,
     });
-    return query;
 };

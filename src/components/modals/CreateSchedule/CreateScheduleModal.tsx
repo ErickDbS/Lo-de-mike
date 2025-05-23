@@ -98,7 +98,14 @@ export default function CreateScheduleModal({
             );
             setClassrooms(classroomsFormat);
         }
-    }, []);
+    }, [
+        queryGroups.data,
+        queryGroups.error,
+        queryGroups.isSuccess,
+        queryClassrooms.data,
+        queryClassrooms.error,
+        queryClassrooms.isSuccess,
+    ]);
 
     //Verificar salon, grupo y las rows
     useEffect(() => {

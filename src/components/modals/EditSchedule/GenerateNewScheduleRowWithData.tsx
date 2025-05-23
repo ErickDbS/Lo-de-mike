@@ -6,6 +6,10 @@ import "rsuite/SelectPicker/styles/index.css";
 import { CircleCheck, CircleX } from "lucide-react";
 import Swal from "sweetalert2";
 import { data } from "react-router-dom";
+import { useGETMasters } from "../../../hooks/useGETMasters";
+import { useGETSubjects } from "../../../hooks/useGETSubjects";
+import { useGETTopics } from "../../../hooks/useGETTopics";
+import { useGETUnits } from "../../../hooks/useGETUnits";
 
 interface Props {
     id: number;
@@ -84,6 +88,12 @@ export default function GenerateNewScheduleRowWithData({
     const [withData, setWithData] = useState<boolean>(false);
     const [allFilledRow, setAllFilledRow] = useState<boolean>(false);
 
+    //Peticiones
+    const queryMasters = useGETMasters();
+    const querySubjects = useGETSubjects();
+    const queryUnits = useGETUnits(subject);
+    const queryTopics = useGETTopics(unit);
+
     //States data
     const [masters, setMasters] = useState<any>();
     const [subjects, setSubjects] = useState<any>();
@@ -98,59 +108,51 @@ export default function GenerateNewScheduleRowWithData({
         const { start_time, end_time } = initData || {};
 
         if (subjId && unitId && masterId && topicId && start_time && end_time) {
-            onChangeSubject(subjId);
-            onChangeUnits(unitId);
-            setStartTime(parseTimeStringToDate(start_time));
-            setEndTime(parseTimeStringToDate(end_time));
+            setSubject(subjId);
+            setUnit(unitId);
             setMaster(masterId);
             setTopic(topicId);
+            setStartTime(parseTimeStringToDate(start_time));
+            setEndTime(parseTimeStringToDate(end_time));
         }
     }, [initData]);
 
     // Carga inicial de los datos
     useEffect(() => {
-        async function loadMeta() {
-            try {
-                const [mastersRes, subjectsRes] = await Promise.all([
-                    fetch("https://schedulechecker.up.railway.app/api/masters"),
-                    fetch(
-                        "https://schedulechecker.up.railway.app/api/subjects"
-                    ),
-                ]);
-                if (!mastersRes.ok || !subjectsRes.ok) {
-                    throw new Error("Error al cargar datos");
-                }
-                // MAESTROS
-                const mastersJson = await mastersRes.json();
-                const mastersFormat = mastersJson.masters.map(
-                    (data: MastersData) => ({
-                        label: `${data.acronym} ${data.lastname} ${data.name} `,
-                        value: data.master_id,
-                    })
-                );
-                setMasters(mastersFormat);
+        if (queryMasters.error || querySubjects.error) {
+            Swal.fire({
+                theme: "dark",
+                icon: "error",
+                title: "Oops...",
+                text: "Error al cargar los datos! Intente más tarde.",
+            });
+        } else if (queryMasters.isSuccess && querySubjects.isSuccess) {
+            // GRUPOS
+            const mastersFormat = queryMasters.data.masters.map(
+                (data: MastersData) => ({
+                    label: `${data.acronym} ${data.lastname} ${data.name}`,
+                    value: data.master_id,
+                })
+            );
+            setMasters(mastersFormat);
 
-                // MATERIAS
-                const subjectsJson = await subjectsRes.json();
-                const subjectsFormat = subjectsJson.subjects.map(
-                    (data: SubjectsData) => ({
-                        label: data.name,
-                        value: data.subject_id,
-                    })
-                );
-                setSubjects(subjectsFormat);
-            } catch (err) {
-                Swal.fire({
-                    theme: "dark",
-                    icon: "error",
-                    title: "Oops...",
-                    text: "Error al cargar los datos! Intente más tarde.",
-                });
-            }
+            // SALONES
+            const subjectsFormat = querySubjects.data.subjects.map(
+                (data: SubjectsData) => ({
+                    label: data.name,
+                    value: data.subject_id,
+                })
+            );
+            setSubjects(subjectsFormat);
         }
-
-        loadMeta();
-    }, []);
+    }, [
+        queryMasters.data,
+        queryMasters.error,
+        queryMasters.isSuccess,
+        querySubjects.data,
+        querySubjects.error,
+        querySubjects.isSuccess,
+    ]);
 
     useEffect(() => {
         const allFilled =
@@ -213,71 +215,49 @@ export default function GenerateNewScheduleRowWithData({
         return date;
     }
 
-    const onChangeSubject = async (value: any) => {
-        setSubject(value);
-        //si hay una opcion elegida hago la peticion
-        if (value) {
-            try {
-                const [unitsRes] = await Promise.all([
-                    fetch(
-                        `https://schedulechecker.up.railway.app/api/units/subjects/${value}`
-                    ),
-                ]);
-                if (!unitsRes.ok) throw new Error("Error al cargar datos");
-                // Unidades
-                const unitsJson = await unitsRes.json();
-                const unitsFormat = unitsJson.units.map((data: UnitsData) => ({
-                    label: `${data.unit_number} ${data.title}`,
+    //Recargar las unidades dependiendo la materia
+    useEffect(() => {
+        if (queryUnits.error) {
+            Swal.fire({
+                theme: "dark",
+                icon: "error",
+                title: "Oops...",
+                text: "La materia no cuenta con unidades. Intente con otra materia.",
+            });
+            setUnits([]);
+        } else if (queryUnits.isSuccess) {
+            const unitsFormat = queryUnits.data.units.map(
+                (data: UnitsData) => ({
+                    label: `U${data.unit_number}.- ${data.title}`,
                     value: data.unit_id,
-                }));
-                setUnits(unitsFormat);
-            } catch (err) {
-                Swal.fire({
-                    theme: "dark",
-                    icon: "error",
-                    title: "Oops...",
-                    text: "La materia no cuenta con unidades. Intente con otra materia.",
-                });
-            }
+                })
+            );
+            setUnitDisable(false);
+            setUnits(unitsFormat);
         }
+    }, [queryUnits.error, queryUnits.isSuccess, queryUnits.data, subject]);
 
-        //Activo o desactivo el campo de la unidad
-        setUnitDisable(value === null);
-    };
-
-    const onChangeUnits = async (value: any) => {
-        setUnit(value);
-        //si hay una opcion elegida hago la peticion
-        if (value) {
-            try {
-                const [topicsRes] = await Promise.all([
-                    fetch(
-                        `https://schedulechecker.up.railway.app/api/topics/unit/${value}`
-                    ),
-                ]);
-                if (!topicsRes.ok) throw new Error("Error al cargar datos");
-                // Unidades
-                const topicsJson = await topicsRes.json();
-                const topicsFormat = topicsJson.topics.map(
-                    (data: TopicsData) => ({
-                        label: data.title,
-                        value: data.topic_id,
-                    })
-                );
-                setTopics(topicsFormat);
-            } catch (err) {
-                Swal.fire({
-                    theme: "dark",
-                    icon: "error",
-                    title: "Oops...",
-                    text: "La unidad no cuenta con temas. Intente con otra unidad.",
-                });
-            }
+    //Recargar los temas dependiendo la unidad
+    useEffect(() => {
+        if (queryTopics.error) {
+            Swal.fire({
+                theme: "dark",
+                icon: "error",
+                title: "Oops...",
+                text: "La unidad no cuenta con temas. Intente con otra unidad.",
+            });
+            setUnits([]);
+        } else if (queryTopics.isSuccess) {
+            const topicsFormat = queryTopics.data.topics.map(
+                (data: TopicsData) => ({
+                    label: data.title,
+                    value: data.topic_id,
+                })
+            );
+            setTopicDisable(false);
+            setTopics(topicsFormat);
         }
-
-        //Activo o desactivo el campo del tema
-        setTopicDisable(value === null);
-    };
+    }, [queryTopics.error, queryTopics.isSuccess, queryTopics.data, unit]);
 
     return (
         <div className="flex flex-row w-full items-center">
@@ -297,14 +277,16 @@ export default function GenerateNewScheduleRowWithData({
                         format="hh:mm aa"
                         showMeridiem
                         container={document.body}
-                        onChange={(value) => setStartTime(formatTime(value))}
+                        onChange={(value) => setStartTime(value)}
+                        value={startTime}
                     />
                     <TimePicker
                         className=""
                         format="hh:mm aa"
                         showMeridiem
                         container={document.body}
-                        onChange={(value) => setEndTime(formatTime(value))}
+                        onChange={(value) => setEndTime(value)}
+                        value={endTime}
                     />
                 </div>
                 <div className="grid grid-cols-4 gap-2 w-full ml-2">
@@ -320,7 +302,7 @@ export default function GenerateNewScheduleRowWithData({
                         placeholder=""
                         className="w-[224]"
                         value={subject}
-                        onChange={(value) => onChangeSubject(value)}
+                        onChange={(value) => setSubject(value)}
                     />
                     <div
                         title={
@@ -333,7 +315,7 @@ export default function GenerateNewScheduleRowWithData({
                             data={units}
                             placeholder=""
                             className="w-full"
-                            onChange={(value) => onChangeUnits(value)}
+                            onChange={(value) => setUnit(value)}
                             value={unit}
                         />
                     </div>

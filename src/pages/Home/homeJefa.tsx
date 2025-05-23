@@ -53,7 +53,6 @@ export default function HomeJefa() {
                                 carrera={schedule[0].career.career}
                                 aula={schedule[0].classroom.name}
                                 horarios={schedule}
-                                onUpdated={schedules.refetch}
                             />
                         );
                     })}

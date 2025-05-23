@@ -9,6 +9,7 @@ import { useGETMasters } from "../../../hooks/useGETMasters";
 import { useGetSet } from "react-use";
 import { useGETSubjects } from "../../../hooks/useGETSubjects";
 import { useGETUnits } from "../../../hooks/useGETUnits";
+import { useGETTopics } from "../../../hooks/useGETTopics";
 
 interface Props {
     id: number;
@@ -84,9 +85,12 @@ export default function GenerateNewScheduleRow({
     const [json, setJson] = useState<object>();
     const [withData, setWithData] = useState<boolean>(false);
     const [allFilledRow, setAllFilledRow] = useState<boolean>(false);
+
+    //Peticiones
     const queryMasters = useGETMasters();
     const querySubjects = useGETSubjects();
     const queryUnits = useGETUnits(subject);
+    const queryTopics = useGETTopics(unit);
 
     //States data
     const [masters, setMasters] = useState<any>();
@@ -107,7 +111,7 @@ export default function GenerateNewScheduleRow({
             // GRUPOS
             const mastersFormat = queryMasters.data.masters.map(
                 (data: MastersData) => ({
-                    label: data.name,
+                    label: `${data.acronym} ${data.lastname} ${data.name}`,
                     value: data.master_id,
                 })
             );
@@ -122,7 +126,14 @@ export default function GenerateNewScheduleRow({
             );
             setSubjects(subjectsFormat);
         }
-    }, []);
+    }, [
+        queryMasters.data,
+        queryMasters.error,
+        queryMasters.isSuccess,
+        querySubjects.data,
+        querySubjects.error,
+        querySubjects.isSuccess,
+    ]);
 
     useEffect(() => {
         const allFilled =
@@ -191,7 +202,7 @@ export default function GenerateNewScheduleRow({
         } else if (queryUnits.isSuccess) {
             const unitsFormat = queryUnits.data.units.map(
                 (data: UnitsData) => ({
-                    label: `${data.unit_number} ${data.title}`,
+                    label: `U${data.unit_number}.- ${data.title}`,
                     value: data.unit_id,
                 })
             );
@@ -200,39 +211,27 @@ export default function GenerateNewScheduleRow({
         }
     }, [queryUnits.error, queryUnits.isSuccess, queryUnits.data]);
 
-    const onChangeUnits = async (value: any) => {
-        setUnit(value);
-        //si hay una opcion elegida hago la peticion
-        if (value) {
-            try {
-                const [topicsRes] = await Promise.all([
-                    fetch(
-                        `https://schedulechecker.up.railway.app/api/topics/unit/${value}`
-                    ),
-                ]);
-                if (!topicsRes.ok) throw new Error("Error al cargar datos");
-                // Unidades
-                const topicsJson = await topicsRes.json();
-                const topicsFormat = topicsJson.topics.map(
-                    (data: TopicsData) => ({
-                        label: data.title,
-                        value: data.topic_id,
-                    })
-                );
-                setTopics(topicsFormat);
-            } catch (err) {
-                Swal.fire({
-                    theme: "dark",
-                    icon: "error",
-                    title: "Oops...",
-                    text: "La unidad no cuenta con temas. Intente con otra unidad.",
-                });
-            }
+    //Recargar los temas dependiendo la unidad
+    useEffect(() => {
+        if (queryTopics.error) {
+            Swal.fire({
+                theme: "dark",
+                icon: "error",
+                title: "Oops...",
+                text: "La unidad no cuenta con temas. Intente con otra unidad.",
+            });
+            setUnits([]);
+        } else if (queryTopics.isSuccess) {
+            const topicsFormat = queryTopics.data.topics.map(
+                (data: TopicsData) => ({
+                    label: data.title,
+                    value: data.topic_id,
+                })
+            );
+            setTopicDisable(false);
+            setTopics(topicsFormat);
         }
-
-        //Activo o desactivo el campo del tema
-        setTopicDisable(value === null);
-    };
+    }, [queryTopics.error, queryTopics.isSuccess, queryTopics.data]);
 
     return (
         <div className="flex flex-row w-full items-center">
@@ -289,7 +288,7 @@ export default function GenerateNewScheduleRow({
                             placeholder=""
                             className="w-full"
                             value={unit}
-                            onChange={(value) => onChangeUnits(value)}
+                            onChange={(value) => setUnit(value)}
                         />
                     </div>
                     <div

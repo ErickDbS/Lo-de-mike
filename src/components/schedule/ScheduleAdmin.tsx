@@ -3,6 +3,7 @@ import EditScheduleModal from "../modals/EditSchedule/EditScheduleModal";
 import { useState } from "react";
 import { Pencil, Trash } from "lucide-react";
 import Swal from "sweetalert2";
+import { useDELETESchedule } from "../../hooks/useDELETESchedule";
 
 interface Horario {
     group: group;
@@ -27,7 +28,6 @@ interface ScheduleProps {
     carrera: string;
     aula: string;
     horarios: Horario[];
-    onUpdated: () => void;
 }
 
 export default function ScheduleAdmin({
@@ -35,10 +35,10 @@ export default function ScheduleAdmin({
     carrera,
     aula,
     horarios,
-    onUpdated,
 }: ScheduleProps) {
     const [isRendered, setIsRendered] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
+    const deleteScheduleMutation = useDELETESchedule();
 
     const formattingTime = (hora: string): string => {
         const partes = hora.split(":");
@@ -66,35 +66,23 @@ export default function ScheduleAdmin({
             cancelButtonText: "Cancelar",
         }).then(async (result) => {
             if (result.isConfirmed) {
-                try {
-                    const res = await fetch(
-                        `https://schedulechecker.up.railway.app/api/class/${horarios[0].group.group_id}`,
-                        {
-                            method: "DELETE",
-                        }
-                    );
-
-                    const json = await res.json();
-                    if (!res.ok) {
-                        throw json;
-                    }
-                    onUpdated();
-
-                    Swal.fire({
-                        title: "Horario eliminado exitosamente",
-                        theme: "dark",
-                        icon: "success",
-                    });
-                } catch (err: any) {
-                    Swal.fire({
-                        theme: "dark",
-                        icon: "error",
-                        title: "No fue posible eliminar el horario.",
-                        text: "Por favor inténtelo de nuevo.",
-                    });
-                }
-            } else {
-                return;
+                deleteScheduleMutation.mutate(horarios[0].group.group_id, {
+                    onSuccess: () => {
+                        Swal.fire({
+                            title: "Horario eliminado exitosamente",
+                            theme: "dark",
+                            icon: "success",
+                        });
+                    },
+                    onError: () => {
+                        Swal.fire({
+                            theme: "dark",
+                            icon: "error",
+                            title: "No fue posible eliminar el horario.",
+                            text: "Por favor inténtalo de nuevo.",
+                        });
+                    },
+                });
             }
         });
     };
@@ -142,6 +130,7 @@ export default function ScheduleAdmin({
                             <th className="p-3 text-sm w-25">Hora</th>
                             <th className="p-3 text-sm">Materia</th>
                             <th className="p-3 text-sm">Profesor</th>
+                            <th className="p-3 text-sm">Unidad</th>
                             <th className="p-3 text-sm">Tema</th>
                         </tr>
                     </thead>
@@ -160,13 +149,16 @@ export default function ScheduleAdmin({
                                         )}`}
                                     </td>
                                     <td className="p-3 text-xs text-center">
-                                        {horario.unit.title}
+                                        {horario.subject.name}
                                     </td>
                                     <td className="p-3 text-xs text-center">
                                         {`${horario.master.acronym} ${horario.master.lastname} ${horario.master.name}`}
                                     </td>
                                     <td className="p-3 text-xs text-center">
-                                        {horario.subject.name}
+                                        {horario.unit.title}
+                                    </td>
+                                    <td className="p-3 text-xs text-center">
+                                        {horario.topic.title}
                                     </td>
                                 </tr>
                             ))}
@@ -176,6 +168,7 @@ export default function ScheduleAdmin({
                                     key={i}
                                     className="odd:bg-gray-800 even:bg-gray-700 transition duration-200"
                                 >
+                                    <td className="p-3 text-xs text-center"></td>
                                     <td className="p-3 text-xs text-center"></td>
                                     <td className="p-3 text-xs text-center"></td>
                                     <td className="p-3 text-xs text-center"></td>
