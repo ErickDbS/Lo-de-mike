@@ -155,10 +155,10 @@ export default function ScheduleAdmin({
                                         {`${horario.master.acronym} ${horario.master.lastname} ${horario.master.name}`}
                                     </td>
                                     <td className="p-3 text-xs text-center">
-                                        {horario.unit.title}
+                                        {horario.unit?.title}
                                     </td>
                                     <td className="p-3 text-xs text-center">
-                                        {horario.topic.title}
+                                        {horario.topic?.title}
                                     </td>
                                 </tr>
                             ))}

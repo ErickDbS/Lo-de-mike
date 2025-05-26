@@ -135,7 +135,7 @@ export default function GenerateNewScheduleRow({
     ]);
 
     useEffect(() => {
-        const allFilled =
+        let allFilled =
             !!groupId &&
             !!classroomId &&
             !!startTime &&
@@ -144,6 +144,16 @@ export default function GenerateNewScheduleRow({
             !!subject &&
             !!topic &&
             !!unit;
+
+        if (isLab()) {
+            allFilled =
+                !!groupId &&
+                !!classroomId &&
+                !!startTime &&
+                !!endTime &&
+                !!master &&
+                !!subject;
+        }
 
         setWithData(
             !!(startTime || endTime || master || subject || topic || unit)
