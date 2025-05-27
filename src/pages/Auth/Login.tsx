@@ -11,7 +11,7 @@ export default function Login() {
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
     const { data, error: fetchError, doFetch, loading } = useFetch(null, null);
-
+    const BASE_URL = import.meta.env.VITE_API_URL as string;
     useEffect(() => {
         if (data) {
             authContext.setStorage({
@@ -41,7 +41,7 @@ export default function Login() {
     } = useForm();
 
     const onSubmit = (data: object) => {
-        doFetch("https://schedulechecker.up.railway.app/api/login", {
+        doFetch(`${BASE_URL}/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),

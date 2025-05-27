@@ -18,6 +18,7 @@ export default function Register() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const navigate = useNavigate();
+    const BASE_URL = import.meta.env.VITE_API_URL as string;
 
     // Hook para uso de formulario
     const {
@@ -80,7 +81,7 @@ export default function Register() {
     };
 
     const onSubmit = (data: object) => {
-        doFetch("https://schedulechecker.up.railway.app/api/users", {
+        doFetch(`${BASE_URL}/users`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
