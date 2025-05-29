@@ -13,23 +13,31 @@ export default function Login() {
     const navigate = useNavigate();
     const { data, error: fetchError, doFetch, loading } = useFetch(null, null);
 
-    useEffect(() => {
-        if (data) {
-            authContext.setStorage({
-                username: data.user.username,
-                name: data.user.name,
-                lastname: data.user.lastname,
-                role: data.user.role_id,
-                group_id: data.user.group_id, // si existe
+useEffect(() => {
+    if (data?.user) {
+        const user = data.user;
 
-            });
-            // Aquí guardas el nombre del grupo en localStorage
-            if (data.user.group_name) {
-                localStorage.setItem("group_name", data.user.group_name);
+        authContext.setStorage({
+            username: user.username,
+            name: user.name,
+            lastname: user.lastname,
+            role: user.role_id,
+            group_id: user.group?.group_id || null,
+        });
+
+        if (user.group?.name) {
+            localStorage.setItem("group_name", user.group.name);
         }
-            navigate("/home");
+        if (user.master?.master_id){
+            localStorage.setItem("master_id", user.master.master_id);
         }
-    }, [data, navigate]);
+
+        navigate("/home");
+    }
+}, [data, navigate]);
+
+
+
 
     useEffect(() => {
         if (fetchError) {

@@ -4,6 +4,7 @@ import Schedule from "../../components/schedule/Schedule";
 import { useFetch } from "../../hooks/useFetch";
 import { AuthContext } from "../../utils/authContext";
 import GroupAttendance from "../../components/GroupAttendance/GroupAttendance";
+import JustificationForm from "../../components/Justifications/Justifications";
 
 export default function Home() {
     const apiUrl = import.meta.env.VITE_API_URL;
@@ -121,15 +122,24 @@ export default function Home() {
                 </div>
             </div>
         );
-    } else if (userRole === 2) {
+        } else if (userRole === 2) {
         // Maestr@
+        const masterId = localStorage.getItem("master_id");
+
         return (
-            <div className="text-white text-center mt-10">
-                <h1>¡Bienvenido Maestr@!</h1>
-                <p>En esta sección verás tus clases y podrás justificar faltas.</p>
+            <div className="text-white mt-10">
+            <h1 className="text-3xl mb-4 text-center">¡Bienvenido Maestr@!</h1>
+            <p className="text-center mb-6">Justifica tus retardos o inasistencias aquí:</p>
+            {masterId ? (
+                <JustificationForm masterId={masterId} />
+            ) : (
+                <p className="text-center">No se encontró tu ID.</p>
+            )}
             </div>
         );
-    } else if (userRole === 3) {
+        }
+
+        else if (userRole === 3) {
         // Checador@
         return (
             <div className="text-white text-center mt-10">

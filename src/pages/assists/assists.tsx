@@ -11,6 +11,7 @@ export default function Assists() {
   const [grupoUsuario, setGrupoUsuario] = useState("");
   const fecha = new Date();
   const fechaActual = fecha.toLocaleDateString("es-MX");
+  const apiUrl = import.meta.env.VITE_API_URL
 
   const registrarAsistencia = async (
     status: "A" | "NA" | "R",
@@ -19,7 +20,7 @@ export default function Assists() {
   ) => {
     try {
       const response = await fetch(
-        "https://schedulechecker.up.railway.app/api/attendances",
+        `${apiUrl}/attendances`,
         {
           method: "POST",
           headers: {
@@ -44,7 +45,7 @@ export default function Assists() {
     const group = localStorage.getItem("group_name");
     setGrupoUsuario(group ?? "sin grupo");
 
-    fetch("https://schedulechecker.up.railway.app/api/class")
+    fetch(`${apiUrl}/class`)
       .then((response) => response.json())
       .then((data) => {
         const clasesRaw = data.classes;
@@ -93,6 +94,7 @@ export default function Assists() {
                 masterId={clase.master.master_id} // ✅ Corrección aquí
                 classId={clase.id}
                 onRegistrarAsistencia={registrarAsistencia}
+                asistenciaYaRegistrada
               />
             ))}
           </div>
