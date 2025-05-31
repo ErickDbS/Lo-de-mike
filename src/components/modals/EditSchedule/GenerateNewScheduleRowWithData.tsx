@@ -82,8 +82,8 @@ export default function GenerateNewScheduleRowWithData({
     const [unit, setUnit] = useState<any>();
     const [isUnitDisable, setUnitDisable] = useState<any>(true);
     const [isTopicDisable, setTopicDisable] = useState<any>(true);
-    const [isComplete, setIsComplete] = useState<boolean>(false);
-    const [json, setJson] = useState<object>();
+    const [, setIsComplete] = useState<boolean>(false);
+    const [, setJson] = useState<object>();
     const [withData, setWithData] = useState<boolean>(false);
     const [allFilledRow, setAllFilledRow] = useState<boolean>(false);
     const isFirstSubjectLoad = useRef(true);

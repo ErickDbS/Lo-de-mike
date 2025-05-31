@@ -15,8 +15,5 @@ export const useDELETESchedule = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["schedules"] });
         },
-        onError: (error) => {
-            // console.error("Error al eliminar horario:", error);
-        },
     });
 };

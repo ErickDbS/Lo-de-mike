@@ -13,8 +13,5 @@ export const useADDSchedule = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["schedules"] });
         },
-        onError: (error) => {
-            // console.error("Error al agregar horario:", error);
-        },
     });
 };

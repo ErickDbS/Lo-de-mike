@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import ScheduleAdmin from "../../components/schedule/ScheduleAdmin";
 import { LoaderCircle } from "lucide-react";
 import { useGETSchedules } from "../../hooks/useGETSchedules";
+import { AxiosError } from "axios";
 
 export default function HomeJefa() {
     const schedules = useGETSchedules();
@@ -10,7 +11,7 @@ export default function HomeJefa() {
     const [filteredData, setFilteredData] = useState<any[]>([]);
     const [groupedData, setGroupedData] = useState<any[]>([]);
 
-    // Ordenar data por grupos
+    // 1. Ordenar data por grupos
     useEffect(() => {
         if (!schedules.data) {
             setGroupedData([]);
@@ -25,27 +26,35 @@ export default function HomeJefa() {
         }
     }, [schedules.data, schedules.error]);
 
-    // Filtrar por busqueda
+    // 2. Filtrar por búsqueda
     useEffect(() => {
         const term = searchTerm.toLowerCase();
-        const data = groupedData?.filter((groupArr) => {
+        const data = groupedData.filter((groupArr) => {
             const grupo = groupArr[0].group.name.toLowerCase();
             const aula = groupArr[0].classroom.name.toLowerCase();
             return grupo.includes(term) || aula.includes(term);
         });
         setFilteredData(data);
-    }, [groupedData, searchTerm, schedules.error, schedules.data]);
+    }, [groupedData, searchTerm]);
 
+    // 3. Manejo de errores (TS: “Property 'response' does not exist on type 'Error'”)
     useEffect(() => {
-        if (
-            schedules?.error?.response.data.message ===
-            "No se encontraron clases registradas para esta carrera y grupo"
-        ) {
-            setError("No hay horarios para mostrar");
-            setFilteredData([]);
-            setGroupedData([]);
-        } else {
-            setError(schedules?.error?.response.data.message);
+        if (schedules.error) {
+            // Casteamos schedules.error a AxiosError para poder acceder a response.data
+            const axiosErr = schedules.error as AxiosError<{ message: string }>;
+            const servidorMsg = axiosErr.response?.data?.message;
+
+            if (
+                servidorMsg ===
+                "No se encontraron clases registradas para esta carrera y grupo"
+            ) {
+                setError("No hay horarios para mostrar");
+                setFilteredData([]);
+                setGroupedData([]);
+            } else {
+                // Si no viene message, usamos cadena vacía o un fallback
+                setError(servidorMsg ?? "");
+            }
         }
     }, [schedules.error]);
 
@@ -96,7 +105,7 @@ export default function HomeJefa() {
             ) : (
                 <div className="w-full h-[calc(100svh_-_13rem)] bg-[#1e2022] rounded-lg p-4 grid grid-cols-1 md:grid-cols-2 gap-8 overflow-y-auto">
                     {filteredData.length > 0 ? (
-                        filteredData?.map((scheduleGroup, index) => (
+                        filteredData.map((scheduleGroup, index) => (
                             <ScheduleAdmin
                                 key={index}
                                 grupo={scheduleGroup[0].group.name}
@@ -105,7 +114,7 @@ export default function HomeJefa() {
                                 horarios={scheduleGroup}
                             />
                         ))
-                    ) : schedules?.error ? (
+                    ) : schedules.error ? (
                         <p className="text-center text-white col-span-full">
                             {error}
                         </p>

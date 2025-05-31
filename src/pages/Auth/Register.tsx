@@ -35,7 +35,7 @@ export default function Register() {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [selectedRole, setSelectedRole] = useState("");
     const [selectedGroup, setSelectedGroup] = useState("");
-    const [selectedCareer, setSelectedCareer] = useState("2"); // Ingeniería de Software con id 2
+    const [selectedCareer] = useState("2"); // Ingeniería de Software con id 2
     const [masters, setMasters] = useState<Master[]>([]);
     const [selectedMaster, setSelectedMaster] = useState("");
     const [loadingMasters, setLoadingMasters] = useState(false);
@@ -53,9 +53,7 @@ export default function Register() {
     const {
         register,
         getValues,
-        watch,
         handleSubmit,
-        setValue,
         formState: { errors, isValid },
     } = useForm();
 
@@ -172,7 +170,7 @@ export default function Register() {
             <div className="min-h-[calc(100vh-4rem)] flex justify-center items-center">
                 <form
                     onSubmit={handleSubmit(onSubmit)}
-                    className="grid gap-3 border-4 w-96 p-6 bg-[#1e2022] shadow-md rounded-md border-[1px] border-gray-400"
+                    className="grid gap-3 w-96 p-6 bg-[#1e2022] shadow-md rounded-md border-[1px] border-gray-400"
                 >
                     <h2 className="text-4xl text-blue-400 text-center mb-2">
                         Crear Cuenta

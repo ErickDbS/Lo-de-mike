@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Pencil, Trash } from "lucide-react";
 import Swal from "sweetalert2";
 import { useDELETESchedule } from "../../hooks/useDELETESchedule";
-import { useGETSchedules } from "../../hooks/useGETSchedules";
 
 interface Horario {
     group: group;

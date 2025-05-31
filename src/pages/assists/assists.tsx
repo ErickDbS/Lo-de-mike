@@ -4,104 +4,103 @@ import PersonalCard from "../../components/Cards/PersonalCard/PersonalCard";
 import { List } from "lucide-react";
 
 export default function Assists() {
-  const authContext = useContext(AuthContext) as any;
-  const userRole: any = authContext.storage.role;
-  const [open, setOpen] = useState(false);
-  const [clases, setClases] = useState<any[]>([]);
-  const [grupoUsuario, setGrupoUsuario] = useState("");
-  const fecha = new Date();
-  const fechaActual = fecha.toLocaleDateString("es-MX");
-  const apiUrl = import.meta.env.VITE_API_URL
+    const authContext = useContext(AuthContext) as any;
+    const userRole: any = authContext.storage.role;
+    const [open, setOpen] = useState(false);
+    const [clases, setClases] = useState<any[]>([]);
+    const [, setGrupoUsuario] = useState("");
+    const fecha = new Date();
+    const fechaActual = fecha.toLocaleDateString("es-MX");
+    const apiUrl = import.meta.env.VITE_API_URL;
 
-  const registrarAsistencia = async (
-    status: "A" | "NA" | "R",
-    class_schedule_id: number,
-    master_id: number
-  ) => {
-    try {
-      const response = await fetch(
-        `${apiUrl}/attendances`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            class_schedule_id,
-            master_id,
-            status,
-          }),
+    const registrarAsistencia = async (
+        status: "A" | "NA" | "R",
+        class_schedule_id: number,
+        master_id: number
+    ) => {
+        try {
+            const response = await fetch(`${apiUrl}/attendances`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    class_schedule_id,
+                    master_id,
+                    status,
+                }),
+            });
+
+            const result = await response.json();
+            console.log("Respuesta del servidor:", result);
+        } catch (error) {
+            console.error("Error al enviar asistencia:", error);
         }
-      );
+    };
 
-      const result = await response.json();
-      console.log("Respuesta del servidor:", result);
-    } catch (error) {
-      console.error("Error al enviar asistencia:", error);
+    useEffect(() => {
+        const group = localStorage.getItem("group_name");
+        setGrupoUsuario(group ?? "sin grupo");
+
+        fetch(`${apiUrl}/class`)
+            .then((response) => response.json())
+            .then((data) => {
+                const clasesRaw = data.classes;
+                console.log("datos en crudo", clasesRaw);
+
+                if (clasesRaw && Array.isArray(clasesRaw)) {
+                    const filterGroup = clasesRaw.filter(
+                        (clase: any) => clase.group.name === group
+                    );
+                    setClases(filterGroup);
+                    console.log("Clases filtradas por grupo:", filterGroup);
+                } else {
+                    console.warn("No se encontraron clases en la respuesta.");
+                }
+            })
+            .catch((error) =>
+                console.error("Error al recuperar los datos", error)
+            );
+    }, []);
+
+    if (userRole === 1) {
+        return (
+            <div className="p-4 w-full max-w-sm md:max-w-md lg:max-w-2xl">
+                <button
+                    onClick={() => setOpen(!open)}
+                    className="bg-blue-800 text-white px-4 py-2 rounded-md shadow w-full hover:bg-blue-900 transition flex justify-between items-center cursor-pointer"
+                >
+                    <span>{fechaActual}</span>
+                    <span>Mostrar Materias</span>
+                    <List size={24} />
+                </button>
+
+                <div
+                    className={`transition-all duration-500 ease-in-out transform ${
+                        open
+                            ? "opacity-100 scale-100"
+                            : "opacity-0 scale-95 pointer-events-none"
+                    }`}
+                >
+                    <div className="mt-5 space-y-4">
+                        {clases.map((clase: any) => (
+                            <PersonalCard
+                                key={clase.id}
+                                nameProfesor={`${clase.master.acronym} ${clase.master.name} ${clase.master.lastname}`}
+                                nameMateria={clase.subject.name}
+                                Tema={clase.topic.title}
+                                Hora={`${clase.start_time} - ${clase.end_time}`}
+                                masterId={clase.master.master_id} // ✅ Corrección aquí
+                                classId={clase.id}
+                                onRegistrarAsistencia={registrarAsistencia}
+                                asistenciaYaRegistrada
+                            />
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
     }
-  };
 
-  useEffect(() => {
-    const group = localStorage.getItem("group_name");
-    setGrupoUsuario(group ?? "sin grupo");
-
-    fetch(`${apiUrl}/class`)
-      .then((response) => response.json())
-      .then((data) => {
-        const clasesRaw = data.classes;
-        console.log("datos en crudo", clasesRaw);
-
-        if (clasesRaw && Array.isArray(clasesRaw)) {
-          const filterGroup = clasesRaw.filter(
-            (clase: any) => clase.group.name === group
-          );
-          setClases(filterGroup);
-          console.log("Clases filtradas por grupo:", filterGroup);
-        } else {
-          console.warn("No se encontraron clases en la respuesta.");
-        }
-      })
-      .catch((error) => console.error("Error al recuperar los datos", error));
-  }, []);
-
-  if (userRole === 1) {
-    return (
-      <div className="p-4 w-full max-w-sm md:max-w-md lg:max-w-2xl">
-        <button
-          onClick={() => setOpen(!open)}
-          className="bg-blue-800 text-white px-4 py-2 rounded-md shadow w-full hover:bg-blue-900 transition flex justify-between items-center cursor-pointer"
-        >
-          <span>{fechaActual}</span>
-          <span>Mostrar Materias</span>
-          <List size={24} />
-        </button>
-
-        <div
-          className={`transition-all duration-500 ease-in-out transform ${
-            open
-              ? "opacity-100 scale-100"
-              : "opacity-0 scale-95 pointer-events-none"
-          }`}
-        >
-          <div className="mt-5 space-y-4">
-            {clases.map((clase: any) => (
-              <PersonalCard
-                key={clase.id}
-                nameProfesor={`${clase.master.acronym} ${clase.master.name} ${clase.master.lastname}`}
-                nameMateria={clase.subject.name}
-                Tema={clase.topic.title}
-                Hora={`${clase.start_time} - ${clase.end_time}`}
-                masterId={clase.master.master_id} // ✅ Corrección aquí
-                classId={clase.id}
-                onRegistrarAsistencia={registrarAsistencia}
-                asistenciaYaRegistrada
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return null;
+    return null;
 }
