@@ -43,12 +43,10 @@ export default function Register() {
 
   const navigate = useNavigate();
 
-  // Obtener grupos
   const { data: groupsResponse } = useFetch<{ groups: Group[] }>(`${apiUrl}/groups`, {
     method: "GET",
   });
 
-  // Hook para registrar formulario
   const {
     register,
     getValues,
@@ -58,10 +56,8 @@ export default function Register() {
     formState: { errors, isValid },
   } = useForm();
 
-  // Hook para hacer fetch para registro
   const { data, error: fetchError, doFetch, loading } = useFetch<RegisterResponse>(null, null);
 
-  // Manejar éxito en registro
   useEffect(() => {
     if (data) {
       Swal.fire({
@@ -80,7 +76,6 @@ export default function Register() {
     }
   }, [data, navigate]);
 
-  // Manejar error de registro
   useEffect(() => {
     if (fetchError) {
       Swal.fire({
@@ -91,7 +86,6 @@ export default function Register() {
     }
   }, [fetchError]);
 
-  // Validar confirmación de password
   const handleConfirmPassword = (value: string) => {
     setConfirmPassword(value);
     validatePasswords(getValues("password"), value);
@@ -105,21 +99,18 @@ export default function Register() {
     }
   };
 
-  // Cuando cambia el rol seleccionado
   useEffect(() => {
     setError("");
-    setSelectedMaster(""); // reset master seleccionado si cambia rol
+    setSelectedMaster("");
     if (selectedRole === "2") {
-      // Si es docente, cargar maestros
       setLoadingMasters(true);
       setMastersError("");
-      fetch(`${apiUrl}/masters`) // Ajusta la URL al endpoint real de maestros
+      fetch(`${apiUrl}/masters`)
         .then((res) => {
           if (!res.ok) throw new Error("Error al cargar maestros");
           return res.json();
         })
         .then((data) => {
-          // Filtrar solo activos "active": "S"
           const activeMasters = data.masters.filter((m: Master) => m.active === "S");
           setMasters(activeMasters);
           setLoadingMasters(false);
@@ -129,13 +120,12 @@ export default function Register() {
           setLoadingMasters(false);
         });
     } else {
-      setMasters([]); // limpiar lista si no es docente
+      setMasters([]);
     }
   }, [selectedRole, apiUrl]);
 
-  // Enviar formulario
   const onSubmit = (formData: any) => {
-    if (selectedRole === "1") {
+    if (selectedRole === "1" || selectedRole === "3") {
       formData.group_id = selectedGroup;
 
       const selectedGroupObject = groupsResponse?.groups.find(
@@ -148,7 +138,7 @@ export default function Register() {
     }
 
     if (selectedRole === "4") {
-      formData.career_id = selectedCareer; // Agregar career_id fijo para Jef@ de Carrera
+      formData.career_id = selectedCareer;
     }
 
     if (selectedRole === "2") {
@@ -252,7 +242,6 @@ export default function Register() {
           </div>
           {error && <p className="text-red-500">{error}</p>}
 
-          {/* Selector de roles */}
           <select
             className="w-80 p-2 border rounded-md text-white"
             {...register("role_id", { required: true })}
@@ -269,8 +258,8 @@ export default function Register() {
             <span className="text-red-500">Seleccione un rol.</span>
           )}
 
-          {/* Si es alumno, seleccionar grupo */}
-          {selectedRole === "1" && (
+          {/* Select de grupo para Alumno o Jef@ de grupo */}
+          {(selectedRole === "1" || selectedRole === "3") && (
             <select
               className="w-80 p-2 border rounded-md text-white"
               value={selectedGroup}
@@ -286,7 +275,7 @@ export default function Register() {
             </select>
           )}
 
-          {/* Si es docente, mostrar select de maestros */}
+          {/* Select de maestro si es docente */}
           {selectedRole === "2" && (
             <>
               {loadingMasters && <p className="text-white">Cargando maestros...</p>}
@@ -309,7 +298,6 @@ export default function Register() {
             </>
           )}
 
-          {/* Si es Jef@ de carrera */}
           {selectedRole === "4" && (
             <p className="text-white">
               Carrera asignada: Ingeniería de Software (ID 2)
@@ -324,17 +312,14 @@ export default function Register() {
               !!error ||
               (selectedRole === "2" && selectedMaster === "")
             }
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2 disabled:opacity-60"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded"
           >
-            {loading ? "Registrando..." : "Registrar"}
+            Registrarse
           </button>
 
-          <p className="text-gray-400 text-sm mt-2">
-            ¿Ya tienes cuenta?{" "}
-            <Link to="/login" className="text-blue-400">
-              Iniciar sesión
-            </Link>
-          </p>
+          <Link to="/" className="text-center text-blue-300 hover:underline">
+            ¿Ya tienes cuenta? Inicia sesión
+          </Link>
         </form>
       </div>
     </>
