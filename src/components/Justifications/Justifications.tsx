@@ -158,7 +158,7 @@ const JustificationForm = ({ masterId }: { masterId: string }) => {
                     />
 
                     <button
-                        onClick={() => handleSubmit(att.id, att.status)}
+                        onClick={() => handleSubmit(att.id)}
                         className="mt-4 bg-blue-600 text-white font-semibold px-5 py-2 rounded-md
                        hover:bg-blue-700 transition-colors duration-300 shadow-md hover:shadow-xl"
                     >
