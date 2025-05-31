@@ -13,20 +13,24 @@ const getSchedules = async (): Promise<ApiResponse> => {
         const response = await axios.get(`${BASE_URL}/classes`);
         return response.data;
     } catch (error: any) {
-        if (error.response) {
-            console.log(error.response.data);
-            console.log(error.response.status);
-            console.log(error.response.headers);
-        } else if (error.request) {
-            console.log(error.request);
-        } else {
-            console.log("Error", error.message);
-        }
+        // if (error.response) {
+        //     // console.log(error.response.data);
+        //     // console.log(error.response.status);
+        //     // console.log(error.response.headers);
+        // } else if (error.request) {
+        //     // console.log(error.request);
+        // } else {
+        //     // console.log("Error", error.message);
+        // }
         throw error;
     }
 };
 
 export const useGETSchedules = () => {
-    const query = useQuery({ queryKey: ["schedules"], queryFn: getSchedules });
+    const query = useQuery({
+        queryKey: ["schedules"],
+        queryFn: getSchedules,
+        retry: false,
+    });
     return query;
 };

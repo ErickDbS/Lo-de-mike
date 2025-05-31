@@ -17,7 +17,7 @@ export const useEDITSchedule = (group_Id: string) => {
             queryClient.invalidateQueries({ queryKey: ["schedules"] });
         },
         onError: (error) => {
-            console.error("Error al editar horario:", error);
+            // console.error("Error al editar horario:", error);
         },
     });
 };

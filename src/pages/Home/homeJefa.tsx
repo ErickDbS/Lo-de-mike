@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import ScheduleAdmin from "../../components/schedule/ScheduleAdmin";
 import { LoaderCircle } from "lucide-react";
 import { useGETSchedules } from "../../hooks/useGETSchedules";
@@ -6,29 +6,48 @@ import { useGETSchedules } from "../../hooks/useGETSchedules";
 export default function HomeJefa() {
     const schedules = useGETSchedules();
     const [searchTerm, setSearchTerm] = useState("");
+    const [error, setError] = useState("");
+    const [filteredData, setFilteredData] = useState<any[]>([]);
+    const [groupedData, setGroupedData] = useState<any[]>([]);
 
     // Ordenar data por grupos
-    const groupedData = useMemo(() => {
-        if (!schedules.data) return [];
-        const map: Record<string, any[]> = {};
-        schedules.data.classes.forEach((row: any) => {
-            const groupName = row.group?.name?.trim() || "";
-            if (!map[groupName]) map[groupName] = [];
-            map[groupName].push(row);
-        });
-        return Object.values(map);
-    }, [schedules.data]);
+    useEffect(() => {
+        if (!schedules.data) {
+            setGroupedData([]);
+        } else {
+            const map: Record<string, any[]> = {};
+            schedules.data.classes.forEach((row: any) => {
+                const groupName = row.group?.name?.trim() || "";
+                if (!map[groupName]) map[groupName] = [];
+                map[groupName].push(row);
+            });
+            setGroupedData(Object.values(map));
+        }
+    }, [schedules.data, schedules.error]);
 
     // Filtrar por busqueda
-    const filteredData = useMemo(() => {
-        if (!searchTerm) return groupedData;
+    useEffect(() => {
         const term = searchTerm.toLowerCase();
-        return groupedData.filter((groupArr) => {
+        const data = groupedData?.filter((groupArr) => {
             const grupo = groupArr[0].group.name.toLowerCase();
             const aula = groupArr[0].classroom.name.toLowerCase();
             return grupo.includes(term) || aula.includes(term);
         });
-    }, [groupedData, searchTerm]);
+        setFilteredData(data);
+    }, [groupedData, searchTerm, schedules.error, schedules.data]);
+
+    useEffect(() => {
+        if (
+            schedules?.error?.response.data.message ===
+            "No se encontraron clases registradas para esta carrera y grupo"
+        ) {
+            setError("No hay horarios para mostrar");
+            setFilteredData([]);
+            setGroupedData([]);
+        } else {
+            setError(schedules?.error?.response.data.message);
+        }
+    }, [schedules.error]);
 
     return (
         <>
@@ -77,7 +96,7 @@ export default function HomeJefa() {
             ) : (
                 <div className="w-full h-[calc(100svh_-_13rem)] bg-[#1e2022] rounded-lg p-4 grid grid-cols-1 md:grid-cols-2 gap-8 overflow-y-auto">
                     {filteredData.length > 0 ? (
-                        filteredData.map((scheduleGroup, index) => (
+                        filteredData?.map((scheduleGroup, index) => (
                             <ScheduleAdmin
                                 key={index}
                                 grupo={scheduleGroup[0].group.name}
@@ -86,6 +105,10 @@ export default function HomeJefa() {
                                 horarios={scheduleGroup}
                             />
                         ))
+                    ) : schedules?.error ? (
+                        <p className="text-center text-white col-span-full">
+                            {error}
+                        </p>
                     ) : (
                         <p className="text-center text-white col-span-full">
                             No se encontraron horarios para “{searchTerm}”.
