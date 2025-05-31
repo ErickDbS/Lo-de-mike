@@ -5,7 +5,7 @@ export default function Layout() {
     return (
         <>
             <Navbar />
-            <main className="flex-1 p-4 bg-[#181a1b]">
+            <main className="flex-1 px-20 py-10 bg-[#181a1b]">
                 <Outlet />
             </main>
         </>

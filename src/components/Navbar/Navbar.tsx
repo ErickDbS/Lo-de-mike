@@ -1,8 +1,15 @@
-import { Bell, CalendarDays, LogOut, Settings } from "lucide-react";
+import {
+    Bell,
+    CalendarDays,
+    CalendarPlus,
+    LogOut,
+    Settings,
+} from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { AuthContext } from "../../utils/authContext";
-import { useContext } from "react";
+import { useContext, useState } from "react";
+import CreateScheduleModal from "../modals/CreateSchedule/CreateScheduleModal";
 
 // 1. Definir tipo para los roles
 type UserRole = 1 | 2 | 3 | 4;
@@ -42,7 +49,7 @@ export default function Navbar() {
         4: [
             {
                 path: "",
-                label: "Opciones de jef@ de carrera",
+                label: "",
                 title: "",
             },
         ],
@@ -80,6 +87,13 @@ export default function Navbar() {
             }
         });
     };
+    const [isRendered, setIsRendered] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
+
+    const handleOpen = () => {
+        setIsRendered(true);
+        setIsOpen(true);
+    };
 
     return (
         <nav className="h-16 w-full bg-blue-800 flex flex-row justify-between items-center px-20">
@@ -114,6 +128,33 @@ export default function Navbar() {
                     Inicio
                     <span className="absolute left-0 bottom-0 h-[2px] bg-white w-0 transition-all duration-300 group-hover:w-full"></span>
                 </Link>
+
+                {userRole === 4 ? (
+                    <>
+                        <Link
+                            className="group relative text-white h-6 flex flex-row"
+                            to="#"
+                            onClick={handleOpen}
+                            title="Crear nuevo horario."
+                        >
+                            <div className="flex fle-row gap-x-[3px]">
+                                <CalendarPlus />
+                                Crear horario
+                            </div>
+                            <span className="absolute left-0 bottom-0 h-[2px] bg-white w-0 transition-all duration-300 group-hover:w-full"></span>
+                        </Link>
+
+                        {isRendered && (
+                            <CreateScheduleModal
+                                isOpen={isOpen}
+                                onClose={() => setIsOpen(false)}
+                                onExited={() => setIsRendered(false)}
+                            />
+                        )}
+                    </>
+                ) : (
+                    ""
+                )}
 
                 {/* Mapeo seguro gracias a la tipificación */}
                 {navOptions[userRole].map((option) => (

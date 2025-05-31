@@ -7,37 +7,34 @@ import { useFetch } from "../../hooks/useFetch";
 import { AuthContext } from "../../utils/authContext";
 
 export default function Login() {
-    const apiUrl = import.meta.env.VITE_API_URL
+    const apiUrl = import.meta.env.VITE_API_URL;
     const authContext = useContext(AuthContext) as any;
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
     const { data, error: fetchError, doFetch, loading } = useFetch(null, null);
 
-useEffect(() => {
-    if (data?.user) {
-        const user = data.user;
+    useEffect(() => {
+        if (data?.user) {
+            const user = data.user;
 
-        authContext.setStorage({
-            username: user.username,
-            name: user.name,
-            lastname: user.lastname,
-            role: user.role_id,
-            group_id: user.group?.group_id || null,
-        });
+            authContext.setStorage({
+                username: user.username,
+                name: user.name,
+                lastname: user.lastname,
+                role: user.role_id,
+                group_id: user.group?.group_id || null,
+            });
 
-        if (user.group?.name) {
-            localStorage.setItem("group_name", user.group.name);
+            if (user.group?.name) {
+                localStorage.setItem("group_name", user.group.name);
+            }
+            if (user.master?.master_id) {
+                localStorage.setItem("master_id", user.master.master_id);
+            }
+
+            navigate("/home");
         }
-        if (user.master?.master_id){
-            localStorage.setItem("master_id", user.master.master_id);
-        }
-
-        navigate("/home");
-    }
-}, [data, navigate]);
-
-
-
+    }, [data, navigate]);
 
     useEffect(() => {
         if (fetchError) {

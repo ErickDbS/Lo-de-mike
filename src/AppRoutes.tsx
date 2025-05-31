@@ -5,7 +5,7 @@ import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
 import Reports from "./pages/reports/reports";
 import History from "./pages/history/History";
-import HomeAdmin from "./pages/Home/homeAdmin";
+import HomeJefa from "./pages/Home/homeJefa";
 import ProtectedRoute from "./utils/protectedRoute";
 import Layout from "./pages/layout/layout";
 import { useContext } from "react";
@@ -34,7 +34,7 @@ export default function AppRoutes() {
                     <Route path="/" element={<Layout />}>
                         <Route
                             path="/home"
-                            element={userRole === 4 ? <HomeAdmin /> : <Home />}
+                            element={userRole === 4 ? <HomeJefa /> : <Home />}
                         />
 
                         <Route path="/schedules" element={<Schedule />} />

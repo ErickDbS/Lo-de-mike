@@ -1,1 +1,7 @@
 @import "tailwindcss";
+@import "tailwindcss-animated";
+
+/* Color del modal */
+.rs-modal-content {
+    background: #181a1b !important;
+}
