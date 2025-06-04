@@ -90,7 +90,7 @@ export default function ScheduleAdmin({
     return (
         <div className="justify-center items-center rounded-2xl group hover:scale-102 transition duration-300 ease-in-out ">
             <div className="w-full max-w-5xl  rounded-2xl shadow-lg overflow-hidden min-h-[25rem]">
-                <div className="bg-blue-800 text-white p-4 text-center text-base font-bold flex flex-row justify-between">
+                <div className="relative bg-blue-800 text-white p-4 text-center text-base font-bold flex flex-row justify-between">
                     <Link
                         className="absolute start-6 hidden group-has-hover:block hover:scale-115 hover:cursor-pointer transition duration-300 ease-in-out text-red-500 animate-fade-right animate-ease-linear animate-duration-300 "
                         to="#"
