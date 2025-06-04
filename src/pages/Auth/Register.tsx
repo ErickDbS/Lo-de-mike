@@ -292,9 +292,9 @@ export default function Register() {
                         onChange={(e) => setSelectedRole(e.target.value)}
                     >
                         <option value="">Seleccione un rol</option>
-                        <option value="1">Alumno</option>
+                        <option value="1">Jef@ de grupo</option>
                         <option value="2">Docente</option>
-                        <option value="3">Jef@ de grupo</option>
+                        <option value="3">Checador</option>
                         <option value="4">Jef@ de carrera</option>
                     </select>
                     {errors.role_id && (

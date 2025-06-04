@@ -12,14 +12,14 @@ interface Clase {
   end_time: string;
   subject: {
     name: string;
-  };
+  } | null;
   master: {
     name: string;
     lastname: string;
-  };
-  topic: {
-    title: string;
-  };
+  } | null;
+  topic?: {
+    title?: string;
+  } | null;
   group: {
     group_id: number;
   };
@@ -33,7 +33,7 @@ interface Asistencia {
 }
 
 export default function Schedule() {
-    const apiUrl = import.meta.env.VITE_API_URL
+  const apiUrl = import.meta.env.VITE_API_URL;
   const [grupos, setGrupos] = useState<Grupo[]>([]);
   const [grupoSeleccionado, setGrupoSeleccionado] = useState<number | null>(null);
 
@@ -49,9 +49,9 @@ export default function Schedule() {
         const res = await fetch(`${apiUrl}/groups`);
         const data = await res.json();
         setGrupos(data.groups);
-        setLoadingGrupos(false);
       } catch (error) {
         console.error("Error al cargar grupos:", error);
+      } finally {
         setLoadingGrupos(false);
       }
     }
@@ -110,10 +110,12 @@ export default function Schedule() {
 
     clasesAgrupadasPorFecha[fecha].push({
       id: clase.id,
-      nameMateria: clase.subject.name,
-      nameProfesor: `${clase.master.name} ${clase.master.lastname}`,
+      nameMateria: clase.subject?.name ?? "Materia no asignada",
+      nameProfesor: clase.master
+        ? `${clase.master.name} ${clase.master.lastname}`
+        : "Profesor no asignado",
       Hora: `${clase.start_time} - ${clase.end_time}`,
-      Tema: clase.topic.title,
+      Tema: clase.topic?.title ?? "Sin tema",
       status: asistencia.status,
     });
   });
@@ -130,7 +132,10 @@ export default function Schedule() {
 
       {/* Selector de grupo */}
       <section className="w-full max-w-4xl mb-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-        <label htmlFor="selectGrupo" className="text-lg font-semibold text-blue-400">
+        <label
+          htmlFor="selectGrupo"
+          className="text-lg font-semibold text-blue-400"
+        >
           Selecciona un grupo:
         </label>
         {loadingGrupos ? (
