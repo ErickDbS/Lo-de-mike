@@ -115,6 +115,21 @@ export default function GenerateNewScheduleRowWithData({
             setStartTime(parseTimeStringToDate(start_time));
             setEndTime(parseTimeStringToDate(end_time));
         }
+
+        if (
+            initData?.is_laboratory &&
+            subjId &&
+            masterId &&
+            start_time &&
+            end_time
+        ) {
+            setSubject(subjId);
+            setUnit(unitId);
+            setMaster(masterId);
+            setTopic(topicId);
+            setStartTime(parseTimeStringToDate(start_time));
+            setEndTime(parseTimeStringToDate(end_time));
+        }
     }, [initData]);
 
     // Carga inicial de los datos
