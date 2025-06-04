@@ -65,14 +65,15 @@ export default function Home() {
         );
     
         const nuevosHorarios = clasesDelGrupo.map((clase: any) => ({
-            hora: `${clase.start_time.slice(0, 5)} - ${clase.end_time.slice(0, 5)}`,
-            materia: clase.subject.name,
-            profesor: `${clase.master.acronym} ${clase.master.name} ${clase.master.lastname}`,
-            tema: clase.topic.title,
-            aula: clase.classroom.name,
-            start: clase.start_time.slice(0, 5),
-            end: clase.end_time.slice(0, 5),
+            hora: `${clase.start_time?.slice(0, 5) ?? ''} - ${clase.end_time?.slice(0, 5) ?? ''}`,
+            materia: clase.subject?.name ?? 'Sin materia',
+            profesor: `${clase.master?.acronym ?? ''} ${clase.master?.name ?? ''} ${clase.master?.lastname ?? ''}`.trim(),
+            tema: clase.topic?.title ?? 'Sin tema',
+            aula: clase.classroom?.name ?? 'Sin aula',
+            start: clase.start_time?.slice(0, 5) ?? '',
+            end: clase.end_time?.slice(0, 5) ?? '',
         }));
+
     
         setHorarios(nuevosHorarios);
     

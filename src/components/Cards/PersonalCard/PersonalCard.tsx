@@ -14,6 +14,7 @@ interface PersonalCardProps {
     masterId: number
   ) => void;
   asistenciaYaRegistrada: boolean;
+  estadoAsistencia?: "A" | "NA" | "R"; // <-- Nuevo prop
 }
 
 export default function PersonalCard({
@@ -25,6 +26,7 @@ export default function PersonalCard({
   classId,
   onRegistrarAsistencia,
   asistenciaYaRegistrada,
+  estadoAsistencia, // <-- Nuevo prop
 }: PersonalCardProps) {
   const [isActive, setIsActive] = useState(false);
   const [estadoSeleccionado, setEstadoSeleccionado] = useState<"A" | "NA" | "R" | null>(null);
@@ -35,11 +37,15 @@ export default function PersonalCard({
 
   // Cargar estado guardado en localStorage al iniciar
   useEffect(() => {
-    const estado = localStorage.getItem(localKey) as "A" | "NA" | "R" | null;
-    if (estado) {
-      setEstadoSeleccionado(estado);
+    if (asistenciaYaRegistrada && estadoAsistencia) {
+      setEstadoSeleccionado(estadoAsistencia);
+    } else {
+      const estado = localStorage.getItem(localKey) as "A" | "NA" | "R" | null;
+      if (estado) {
+        setEstadoSeleccionado(estado);
+      }
     }
-  }, [localKey]);
+  }, [localKey, asistenciaYaRegistrada, estadoAsistencia]);
 
   // Controla si el botón está activo basado en la hora actual y hora de la clase
   useEffect(() => {
@@ -92,7 +98,8 @@ export default function PersonalCard({
     }
   };
 
-  // Deshabilita botones si ya fue registrada asistencia (backend o local)
+  // Si hay asistencia registrada desde backend, usa ese estado
+  const estadoFinal = asistenciaYaRegistrada && estadoAsistencia ? estadoAsistencia : estadoSeleccionado;
   const yaRegistrada = asistenciaYaRegistrada || estadoSeleccionado !== null;
 
   return (
@@ -112,8 +119,8 @@ export default function PersonalCard({
             <strong className="text-blue-800">Hora:</strong> {Hora}
           </p>
           {yaRegistrada && (
-            <p className={`mt-2 text-lg font-semibold ${getEstadoColor(estadoSeleccionado)}`}>
-              Asistencia registrada: {getEstadoTexto(estadoSeleccionado)}
+            <p className={`mt-2 text-lg font-semibold ${getEstadoColor(estadoFinal)}`}>
+              Asistencia registrada: {getEstadoTexto(estadoFinal)}
             </p>
           )}
         </div>
@@ -124,7 +131,7 @@ export default function PersonalCard({
             disabled={!isActive || yaRegistrada}
             className={`px-4 py-2 rounded-xl text-xl transition flex items-center gap-2
               ${
-                estadoSeleccionado === "A"
+                estadoFinal === "A"
                   ? "bg-green-700 text-white"
                   : !isActive || yaRegistrada
                   ? "bg-gray-400 text-gray-200 cursor-not-allowed"
@@ -140,7 +147,7 @@ export default function PersonalCard({
             disabled={!isActive || yaRegistrada}
             className={`px-4 py-2 rounded-xl text-xl transition flex items-center gap-2
               ${
-                estadoSeleccionado === "NA"
+                estadoFinal === "NA"
                   ? "bg-red-700 text-white"
                   : !isActive || yaRegistrada
                   ? "bg-gray-400 text-gray-200 cursor-not-allowed"
@@ -156,7 +163,7 @@ export default function PersonalCard({
             disabled={!isActive || yaRegistrada}
             className={`px-4 py-2 rounded-xl text-xl transition flex items-center gap-2
               ${
-                estadoSeleccionado === "R"
+                estadoFinal === "R"
                   ? "bg-yellow-600 text-white"
                   : !isActive || yaRegistrada
                   ? "bg-gray-400 text-gray-200 cursor-not-allowed"

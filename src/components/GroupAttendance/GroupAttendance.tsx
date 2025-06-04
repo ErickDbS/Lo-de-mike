@@ -19,6 +19,7 @@ type Group = {
 type Asistencia = {
   class_schedule_id: number;
   date: string; // YYYY-MM-DD
+  status: "A" | "NA" | "R";
 };
 
 export default function GroupAttendance() {
@@ -49,31 +50,32 @@ export default function GroupAttendance() {
     obtenerAsistencias();
   }, []);
 
-  const obtenerClases = async (grupo: string) => {
-    setGrupoSeleccionado(grupo);
-    try {
-      const res = await fetch(`${apiUrl}/class`);
-      const data = await res.json();
+    const obtenerClases = async (grupo: string) => {
+      setGrupoSeleccionado(grupo);
+      try {
+        const res = await fetch(`${apiUrl}/class`);
+        const data = await res.json();
 
-      const clasesRaw = data.clases || data.classes || [];
+        const clasesRaw = data.clases || data.classes || [];
 
-      const clasesGrupo = clasesRaw
-        .filter((c: any) => c.group?.name === grupo)
-        .map((clase: any) => ({
-          id: clase.id,
-          materia: clase.subject.name,
-          profesor: `${clase.master.acronym} ${clase.master.name} ${clase.master.lastname}`,
-          grupo: clase.group.name,
-          tema: clase.topic.title,
-          hora: `${clase.start_time.slice(0, 5)} - ${clase.end_time.slice(0, 5)}`,
-          masterId: clase.master.master_id,
-        }));
+        const clasesGrupo = clasesRaw
+          .filter((c: any) => c.group?.name === grupo)
+          .map((clase: any) => ({
+            id: clase.id,
+            materia: clase.subject?.name || "Sin materia",
+            profesor: `${clase.master?.acronym || ""} ${clase.master?.name || ""} ${clase.master?.lastname || ""}`.trim(),
+            grupo: clase.group?.name || "Sin grupo",
+            tema: clase.topic?.title || "Sin tema",
+            hora: `${clase.start_time?.slice(0, 5) || "00:00"} - ${clase.end_time?.slice(0, 5) || "00:00"}`,
+            masterId: clase.master?.master_id || 0,
+          }));
 
-      setClases(clasesGrupo);
-    } catch (error) {
-      console.error("Error al obtener clases:", error);
-    }
-  };
+        setClases(clasesGrupo);
+      } catch (error) {
+        console.error("Error al obtener clases:", error);
+      }
+    };
+
 
   const obtenerAsistencias = async () => {
     try {
@@ -83,6 +85,7 @@ export default function GroupAttendance() {
       const asistencias = (data.attendance || []).map((a: any) => ({
         class_schedule_id: a.class_schedule_id,
         date: a.created_at.slice(0, 10),
+        status: a.status, // <-- Agrega el estado
       }));
 
       setAsistenciasRegistradas(asistencias);
@@ -153,8 +156,8 @@ export default function GroupAttendance() {
 
             <div className="grid gap-6">
               {clases.map((clase) => {
-                // Verifica si ya se registró asistencia hoy para esta clase
-                const asistenciaHoy = asistenciasRegistradas.some(
+                // Busca la asistencia de hoy para esta clase
+                const asistenciaHoy = asistenciasRegistradas.find(
                   (a) => a.class_schedule_id === clase.id && a.date === hoy
                 );
 
@@ -168,7 +171,8 @@ export default function GroupAttendance() {
                     Tema={clase.tema}
                     masterId={clase.masterId}
                     onRegistrarAsistencia={registrarAsistencia}
-                    asistenciaYaRegistrada={asistenciaHoy}
+                    asistenciaYaRegistrada={!!asistenciaHoy}
+                    estadoAsistencia={asistenciaHoy?.status} // <-- Nuevo prop
                   />
                 );
               })}
