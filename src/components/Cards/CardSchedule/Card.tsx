@@ -1,12 +1,17 @@
 interface CardProps {
     nameProfesor: string;
     nameMateria: string;
-    Tema:string;
+    Tema: string;
     Hora: string;
     mostrarBoton: boolean;
 }
 
-export default function Card({ nameProfesor, nameMateria, Hora, Tema, mostrarBoton }: CardProps) {
+export default function Card({
+    nameProfesor,
+    nameMateria,
+    Hora,
+    Tema,
+}: CardProps) {
     return (
         <>
             <div className="grid place-items-center">
