@@ -14,9 +14,12 @@ const JustificationForm = ({ masterId }: { masterId: string }) => {
                 const justificationRes = await fetch(
                     `${apiUrl}/justifications/master/${masterId}`
                 );
-                const justificationData = await justificationRes.json();
+                let justificationData = { justifications: [] };
+                if (justificationRes.ok) {
+                    justificationData = await justificationRes.json();
+                }
                 const justifiedAttendanceIds = new Set(
-                    justificationData.justifications.map(
+                    (justificationData.justifications || []).map(
                         (j: any) => j.attendance_id
                     )
                 );

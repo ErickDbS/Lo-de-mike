@@ -31,6 +31,9 @@ export default function Login() {
             if (user.master?.master_id) {
                 localStorage.setItem("master_id", user.master.master_id);
             }
+            if (user.enrollment_number){
+                localStorage.setItem("enrollment_number", user.enrollment_number);
+            }
 
             navigate("/home");
         }
