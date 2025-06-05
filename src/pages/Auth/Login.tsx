@@ -18,6 +18,7 @@ export default function Login() {
             const user = data.user;
 
             authContext.setStorage({
+                id: user.enrollment_number,
                 username: user.username,
                 name: user.name,
                 lastname: user.lastname,
@@ -72,7 +73,7 @@ export default function Login() {
             <div className="min-h-[calc(100vh-4rem)] flex flex-col justify-center items-center relative">
                 <form
                     onSubmit={handleSubmit(onSubmit)}
-                    className="grid gap-4 border-4 w-96 p-6 bg-[#1e2022] shadow-md rounded-md border-[1px] border-gray-400"
+                    className="grid gap-4  w-96 p-6 bg-[#1e2022] shadow-md rounded-md border-[1px] border-gray-400"
                 >
                     <label className="grid text-4xl place-items-center text-blue-400">
                         Iniciar Sesión
