@@ -358,7 +358,10 @@ export default function Register() {
 
                     {selectedRole === "4" && (
                         <p className="text-white">
-                            Carrera asignada: Ingeniería de Software (ID 2)
+                            <select className="w-80 p-2 border rounded-md text-white">
+                                <option value="">Seleccione una carrera</option>
+                                <option value="">Ingenieria en Software</option>
+                            </select>
                         </p>
                     )}
 
