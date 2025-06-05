@@ -78,6 +78,8 @@ export default function Navbar() {
                 localStorage.removeItem("UserData");
                 localStorage.removeItem("group_name");
                 localStorage.removeItem("aula_del_grupo");
+                localStorage.removeItem("master_id");
+                localStorage.removeItem("enrollment_number");
                 const claves = Object.keys(localStorage);
                 claves.forEach((clave) => {
                     if (clave.startsWith("asistencia_")) {
