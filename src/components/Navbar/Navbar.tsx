@@ -10,6 +10,7 @@ import Swal from "sweetalert2";
 import { AuthContext } from "../../utils/authContext";
 import { useContext, useState } from "react";
 import CreateScheduleModal from "../modals/CreateSchedule/CreateScheduleModal";
+import UserSettignsModal from "../modals/UserSettings/UserSettingsModal";
 
 // 1. Definir tipo para los roles
 type UserRole = 1 | 2 | 3 | 4;
@@ -78,9 +79,9 @@ export default function Navbar() {
                 localStorage.removeItem("group_name");
                 localStorage.removeItem("aula_del_grupo");
                 const claves = Object.keys(localStorage);
-                claves.forEach(clave => {
-                    if (clave.startsWith('asistencia_')) {
-                    localStorage.removeItem(clave);
+                claves.forEach((clave) => {
+                    if (clave.startsWith("asistencia_")) {
+                        localStorage.removeItem(clave);
                     }
                 });
                 navigate("/");
@@ -89,10 +90,17 @@ export default function Navbar() {
     };
     const [isRendered, setIsRendered] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
+    const [isRendered2, setIsRendered2] = useState(false);
+    const [isOpenSettings, setIsOpenSettings] = useState(false);
 
     const handleOpen = () => {
         setIsRendered(true);
         setIsOpen(true);
+    };
+
+    const handleOpenSettings = () => {
+        setIsRendered2(true);
+        setIsOpenSettings(true);
     };
 
     return (
@@ -181,11 +189,21 @@ export default function Navbar() {
 
                     <Link
                         className="hover:font-bold duration-100 ease-in p-2"
-                        to="/settings"
+                        to="#"
                         title="Configuraciones"
+                        onClick={handleOpenSettings}
                     >
                         <Settings className="w-6 h-6 stroke-2 stroke-current transition duration-500 hover:text-yellow-500" />
                     </Link>
+
+                    {isRendered2 && (
+                        <UserSettignsModal
+                            isOpen={isOpenSettings}
+                            onClose={() => setIsOpenSettings(false)}
+                            onExited={() => setIsRendered2(false)}
+                        />
+                    )}
+
                     <a
                         className="hover:font-bold duration-100 ease-in p-2 cursor-pointer"
                         title="Cerrar Sesión"
