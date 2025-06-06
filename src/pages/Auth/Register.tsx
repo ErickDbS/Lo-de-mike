@@ -54,14 +54,13 @@ export default function Register() {
         register,
         getValues,
         handleSubmit,
-        formState: { errors, isValid },
+        formState: { errors },
     } = useForm();
 
     const {
         data,
         error: fetchError,
         doFetch,
-        loading,
     } = useFetch<RegisterResponse>(null, null);
 
     useEffect(() => {
@@ -77,7 +76,7 @@ export default function Register() {
                     lastname: getValues("lastname"),
                     role: getValues("role_id"),
                 });
-                navigate("/home");
+                navigate("/login");
             });
         }
     }, [data, navigate]);
@@ -183,6 +182,7 @@ export default function Register() {
                                 className="w-38 p-2 mr-2 border rounded-md placeholder:text-gray-400 text-white"
                                 placeholder="Nombre"
                                 {...register("name", { required: true })}
+                                required
                             />
                             {errors.name && (
                                 <span className="text-red-500">
@@ -196,6 +196,7 @@ export default function Register() {
                                 className="w-38 p-2 ml-2 border rounded-md placeholder:text-gray-400 text-white"
                                 placeholder="Apellido Paterno"
                                 {...register("lastname", { required: true })}
+                                required
                             />
                             {errors.lastname && (
                                 <span className="ml-2 text-red-500">
@@ -210,6 +211,7 @@ export default function Register() {
                         className="w-80 p-2 border rounded-md placeholder:text-gray-400 text-white"
                         placeholder="Nombre de usuario"
                         {...register("username", { required: true })}
+                        required
                     />
                     {errors.username && (
                         <span className="text-red-500">
@@ -229,6 +231,7 @@ export default function Register() {
                                 required: true,
                                 minLength: 8,
                             })}
+                            required
                         />
                         <button
                             type="button"
@@ -300,7 +303,7 @@ export default function Register() {
                     )}
 
                     {/* Select de grupo para Alumno o Jef@ de grupo */}
-                    {(selectedRole === "1" || selectedRole === "3") && (
+                    {selectedRole === "1" && (
                         <select
                             className="w-80 p-2 border rounded-md text-white"
                             value={selectedGroup}
@@ -367,12 +370,6 @@ export default function Register() {
 
                     <button
                         type="submit"
-                        disabled={
-                            loading ||
-                            !isValid ||
-                            !!error ||
-                            (selectedRole === "2" && selectedMaster === "")
-                        }
                         className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded"
                     >
                         Registrarse
