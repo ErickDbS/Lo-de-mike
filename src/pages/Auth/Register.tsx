@@ -132,7 +132,7 @@ export default function Register() {
     }, [selectedRole, apiUrl]);
 
     const onSubmit = (formData: any) => {
-        if (selectedRole === "1" || selectedRole === "3") {
+        if (selectedRole === "1") {
             formData.group_id = selectedGroup;
 
             const selectedGroupObject = groupsResponse?.groups.find(
