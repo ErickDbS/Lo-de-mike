@@ -1,7 +1,7 @@
-import React, { useContext, useEffect, useState } from 'react';
-import Swal from 'sweetalert2';
-import 'sweetalert2/dist/sweetalert2.min.css';
-import { AuthContext } from '../../utils/authContext';
+import { useContext, useEffect, useState } from "react";
+import Swal from "sweetalert2";
+import "sweetalert2/dist/sweetalert2.min.css";
+import { AuthContext } from "../../utils/authContext";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -28,13 +28,15 @@ type Justification = {
 
 /* ──────────── Componente ──────────── */
 export default function JustificationsPage() {
-  const [masters, setMasters] = useState<Master[]>([]);
-  const [attendances, setAttendances] = useState<Attendance[]>([]);
-  const [justifications, setJustifications] = useState<Justification[]>([]);
-  const [filteredJustifications, setFilteredJustifications] = useState<Justification[]>([]);
-  const [selectedMaster, setSelectedMaster] = useState<string>('');
-      const authContext = useContext(AuthContext) as any;
-      const userRole: any = authContext.storage.role;
+    const [masters, setMasters] = useState<Master[]>([]);
+    const [attendances, setAttendances] = useState<Attendance[]>([]);
+    const [justifications, setJustifications] = useState<Justification[]>([]);
+    const [filteredJustifications, setFilteredJustifications] = useState<
+        Justification[]
+    >([]);
+    const [selectedMaster, setSelectedMaster] = useState<string>("");
+    const authContext = useContext(AuthContext) as any;
+    const userRole: any = authContext.storage.role;
 
     useEffect(() => {
         (async () => {
@@ -147,71 +149,72 @@ export default function JustificationsPage() {
         });
 
     if (userRole === 4) {
-      return (
-        <div className="p-6 max-w-4xl mx-auto min-h-screen">
-          <h1 className="text-3xl font-bold mb-6 text-white">
-            Revisión&nbsp;de&nbsp;Justificaciones
-          </h1>
+        return (
+            <div className="p-6 max-w-4xl mx-auto min-h-screen">
+                <h1 className="text-3xl font-bold mb-6 text-white">
+                    Revisión&nbsp;de&nbsp;Justificaciones
+                </h1>
 
-          <div className="mb-6">
-            <label
-              htmlFor="masterSelect"
-              className="block text-sm font-medium text-white mb-1"
-            >
-              Selecciona un profesor
-            </label>
-            <select
-              id="masterSelect"
-              className="w-full border border-blue-200 rounded px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-800 bg-gray-900 text-white"
-              value={selectedMaster}
-              onChange={e => setSelectedMaster(e.target.value)}
-            >
-              <option value="">-- Seleccionar --</option>
-              {masters.map(m => (
-                <option key={m.master_id} value={m.master_id}>
-                  {m.acronym} {m.name} {m.lastname}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {filteredJustifications.length === 0 ? (
-            <p className="text-white italic">
-              No hay justificaciones pendientes para este profesor.
-            </p>
-          ) : (
-            <div className="space-y-4">
-              {filteredJustifications.map(j => (
-                <div
-                  key={j.id}
-                  className="border border-blue-200 rounded-lg p-4 shadow-sm bg-gray-800 text-white transition transform duration-300 ease-in-out hover:scale-[1.02] hover:shadow-lg animate-fade-in"
-                >
-                  <p className="mb-2">
-                    <strong>Justificación:</strong> {j.justification}
-                  </p>
-                  <p className="mb-4 text-sm">
-                    <strong>Fecha:</strong> {formatDate(j.created_at)}
-                  </p>
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => handleReview(j.id, 'A')}
-                      className="bg-blue-800 hover:bg-blue-900 text-white font-medium px-4 py-2 rounded transition duration-200"
+                <div className="mb-6">
+                    <label
+                        htmlFor="masterSelect"
+                        className="block text-sm font-medium text-white mb-1"
                     >
-                      Aceptar
-                    </button>
-                    <button
-                      onClick={() => handleReview(j.id, 'R')}
-                      className="border border-blue-800 text-white hover:bg-blue-900 hover:border-white font-medium px-4 py-2 rounded transition duration-200"
+                        Selecciona un profesor
+                    </label>
+                    <select
+                        id="masterSelect"
+                        className="w-full border border-blue-200 rounded px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-800 bg-gray-900 text-white"
+                        value={selectedMaster}
+                        onChange={(e) => setSelectedMaster(e.target.value)}
                     >
-                      Rechazar
-                    </button>
-                  </div>
+                        <option value="">-- Seleccionar --</option>
+                        {masters.map((m) => (
+                            <option key={m.master_id} value={m.master_id}>
+                                {m.acronym} {m.name} {m.lastname}
+                            </option>
+                        ))}
+                    </select>
                 </div>
-              ))}
+
+                {filteredJustifications.length === 0 ? (
+                    <p className="text-white italic">
+                        No hay justificaciones pendientes para este profesor.
+                    </p>
+                ) : (
+                    <div className="space-y-4">
+                        {filteredJustifications.map((j) => (
+                            <div
+                                key={j.id}
+                                className="border border-blue-200 rounded-lg p-4 shadow-sm bg-gray-800 text-white transition transform duration-300 ease-in-out hover:scale-[1.02] hover:shadow-lg animate-fade-in"
+                            >
+                                <p className="mb-2">
+                                    <strong>Justificación:</strong>{" "}
+                                    {j.justification}
+                                </p>
+                                <p className="mb-4 text-sm">
+                                    <strong>Fecha:</strong>{" "}
+                                    {formatDate(j.created_at)}
+                                </p>
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => handleReview(j.id, "A")}
+                                        className="bg-blue-800 hover:bg-blue-900 text-white font-medium px-4 py-2 rounded transition duration-200"
+                                    >
+                                        Aceptar
+                                    </button>
+                                    <button
+                                        onClick={() => handleReview(j.id, "R")}
+                                        className="border border-blue-800 text-white hover:bg-blue-900 hover:border-white font-medium px-4 py-2 rounded transition duration-200"
+                                    >
+                                        Rechazar
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
-          )}
-        </div>
-      );
-  }
-  
+        );
+    }
 }
